@@ -101,7 +101,7 @@ export const Navbar = () => {
                                         <span className="sr-only">Toggle dashboard menu</span>
 
                                         <img
-                                            src={user?.avatarUrl} alt={user.name}
+                                            src={user?.avatarUrl || "https://avatar.iran.liara.run/public"} alt={user.name}
                                             className="size-10 object-cover"
                                         />
                                     </button>
@@ -113,13 +113,18 @@ export const Navbar = () => {
                                 className="absolute end-0 z-10 mt-0.5 w-56 rounded-md border border-gray-100 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900"
                                 role="menu"
                             >
+
+                                <div className="p-2 ">
+                                    <p className="px-4 pt-2 text-sm text-gray-500 dark:text-gray-400 capitalize truncate " >{user?.name}</p>
+                                    <p className="px-4 pb-2 text-sm text-gray-500 dark:text-gray-400 truncate " >{user?.email}</p>
+                                </div>
                                 <div className="p-2">
                                     <a
                                         href="#"
                                         className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
                                         role="menuitem"
                                     >
-                                        My profile
+                                        Mi perfil
                                     </a>
 
                                     <a
@@ -127,7 +132,7 @@ export const Navbar = () => {
                                         className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
                                         role="menuitem"
                                     >
-                                        My data
+                                        Mis grupos
                                     </a>
 
                                     <a
@@ -135,7 +140,7 @@ export const Navbar = () => {
                                         className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
                                         role="menuitem"
                                     >
-                                        Team settings
+                                        Sesiones pendientes
                                     </a>
 
                                     <button
@@ -189,22 +194,9 @@ export const Navbar = () => {
                                 className="absolute end-0 z-10 mt-0.5 w-56 rounded-md border border-gray-100 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900"
                                 role="menu"
                             >
-
-                                <div className="p-2">
-                                    <a
-                                        href="#"
-                                        className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
-                                        role="menuitem"
-                                    >
-                                        Services
-                                    </a>
-                                    <a
-                                        href="#"
-                                        className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
-                                        role="menuitem"
-                                    >
-                                        Etc...
-                                    </a>
+                                <div className="p-2 ">
+                                    <p className="px-4 pt-2 text-sm text-gray-500 dark:text-gray-400 capitalize truncate " >{user?.name}</p>
+                                    <p className="px-4 pb-2 text-sm text-gray-500 dark:text-gray-400 truncate " >{user?.email}</p>
                                 </div>
                                 <div className="p-2">
                                     <a
@@ -212,7 +204,7 @@ export const Navbar = () => {
                                         className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
                                         role="menuitem"
                                     >
-                                        My profile
+                                        Mi perfil
                                     </a>
 
                                     <a
@@ -220,10 +212,33 @@ export const Navbar = () => {
                                         className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
                                         role="menuitem"
                                     >
-                                        My data
+                                        Mis grupos
                                     </a>
 
+                                    <a
+                                        href="#"
+                                        className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+                                        role="menuitem"
+                                    >
+                                        Sesiones pendientes
+                                    </a>
 
+                                </div>
+                                <div className="p-2">
+
+                                    <a
+                                        href="#features"
+                                        className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+                                        role="menuitem"
+                                    >
+                                        Caracteristicas
+                                    </a>
+                                    <a
+                                        href="#steps"
+                                        className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+                                        role="menuitem"
+                                    >
+                                        Como usar                                    </a>
 
                                     <button
                                         type="submit"

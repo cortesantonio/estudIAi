@@ -26,7 +26,7 @@ export const login = async (datos: LoginInterface) => {
     }
 };
 
-export const register = async (datos: LoginInterface) => {
+export const registerUser = async (datos: LoginInterface) => {
     const urlApi = import.meta.env.VITE_API_URL;
 
     try {
