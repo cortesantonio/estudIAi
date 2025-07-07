@@ -88,7 +88,7 @@ export const Groups = () => {
 
                             <div className="w-full max-w-full px-3 mb-6 md:w-6/12 md:flex-none xl:mb-0 xl:w-3/12">
                                 <div
-                                    className="relative flex flex-col h-full min-w-0 break-words bg-transparent border border-solid shadow-none rounded-2xl border-slate-100 bg-clip-border dark:border-gray-600 hover:scale-101 transition-all cursor-pointer"
+                                    className="relative flex flex-col h-full min-w-0 break-words bg-transparent border border-solid shadow-none rounded-2xl border-slate-100 bg-clip-border dark:border-gray-600 hover:scale-99 transition-all cursor-pointer"
                                     onClick={() => alert("funcion para abrir modal y crear nuebo grupo")}
                                 >
                                     <div className="flex flex-col justify-center flex-auto p-6 text-center">
