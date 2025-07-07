@@ -1,8 +1,10 @@
 import { useEffect } from "react"
 import { useForm } from "react-hook-form";
 import type { FormData } from "../../interfaces/Auth";
-
+import { registerUser } from "../../services/authService";
+import { useNavigate } from "react-router-dom";
 export const Registro = () => {
+    const navigate = useNavigate();
     const {
         register,
         handleSubmit,
@@ -32,9 +34,21 @@ export const Registro = () => {
         }
     }, [password, confirmPassword, setError, clearErrors]);
 
-    const onSubmit = (data: FormData) => {
+    const onSubmit = async (data: FormData) => {
         const { confirmPassword, ...userData } = data;
-        console.log("Usuario registrado:", userData);
+        try {
+            const response = await registerUser(userData);
+            localStorage.setItem("token", response.token)
+            localStorage.setItem("user", JSON.stringify(response.user))
+            return navigate("/")
+
+        }
+        catch (error) {
+            setError("email", {
+                type: "manual",
+                message: "El email ya esta en uso.",
+            });
+        }
     };
 
     return (
