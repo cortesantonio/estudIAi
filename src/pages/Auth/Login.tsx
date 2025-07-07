@@ -2,8 +2,9 @@ import { useState } from "react";
 import type { LoginInterface } from "../../interfaces/Auth";
 import { login } from "../../services/authService";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
 
-interface respondeDTO {
+interface responseDTO {
     user: {
         id: number,
         email: string,
@@ -17,23 +18,17 @@ interface respondeDTO {
 
 export const Login = () => {
     const navigate = useNavigate();
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
-    const [error, setError] = useState("")
+    const [error, setError] = useState<string>();
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<LoginInterface>();
 
-    const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-
-        if (!email || !password) {
-            setError("Asegúrate de que hayas ingresado todos los campos.");
-            setTimeout(() => setError(""), 3000);
-            return;
-        }
-
-        const loginData: LoginInterface = { email, password };
+    const onSubmit = async (data: LoginInterface) => {
 
         try {
-            const response: respondeDTO = await login(loginData);
+            const response: responseDTO = await login(data);
             console.log(typeof (response));
             if (response) {
                 localStorage.setItem("token", response.token)
@@ -42,7 +37,7 @@ export const Login = () => {
             }
 
         } catch (error: any) {
-            setError(error.message);
+            setError(error.message || "Error desconocido");
             setTimeout(() => setError(""), 3000);
         }
     };
@@ -134,31 +129,36 @@ c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.
                         </div>
                     </div>
                     <div>
-                        <form className="mb-4" onSubmit={handleLogin}>
+                        <form className="mb-4" onSubmit={handleSubmit(onSubmit)}>
                             <div className="grid gap-2">
                                 <div className="grid gap-1">
                                     <label className="text-white" >Email</label>
                                     <input
                                         className="mr-2.5 mb-2 h-full min-h-[44px] w-full rounded-lg border dark:bg-transparent text-dark  border-zinc-800 px-4 py-3 text-sm font-medium placeholder:text-zinc-400 focus:outline-0 dark:border-zinc-800 dark:bg-blask dark:text-white dark:placeholder:text-zinc-400"
-                                        id="email"
                                         placeholder="name@example.com"
                                         type="email"
-                                        value={email}
-                                        onChange={(e) => { setEmail(e.target.value) }}
-                                        required
-                                    /><label
+                                        {...register("email", { required: "El email es obligatorio" })}
+
+                                    />
+                                    {errors.email && <p className="text-red-400">{errors.email.message}</p>}
+
+                                    <label
                                         className="text-zinc-950 mt-2 dark:text-white"
                                     >Password</label>
                                     <input
-                                        id="password"
                                         placeholder="Password"
                                         type="password"
                                         className="mr-2.5 mb-2 h-full min-h-[44px] w-full rounded-lg border dark:bg-transparent text-dark  border-zinc-800 px-4 py-3 text-sm font-medium placeholder:text-zinc-400 focus:outline-0 dark:border-zinc-800 dark:bg-blask dark:text-white dark:placeholder:text-zinc-400"
-                                        value={password}
-                                        onChange={(e) => { setPassword(e.target.value) }}
-                                        required
+                                        {...register("password", { required: "La contraseña es obligatoria" })}
+
 
                                     />
+
+                                    {errors.password && (
+                                        <p className="text-red-400">{errors.password.message}</p>
+                                    )}
+
+
                                 </div>
                                 <button
                                     className="whitespace-nowrap ring-offset-background transition-colors 
@@ -188,7 +188,7 @@ c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.
                     </div>
                 </div>
             </div >
-            {error.length > 0 && (
+            {error && (
                 <div role="alert" className="fixed bottom-5 left-5 border-s-4 border-red-700 bg-red-50 dark:bg-white/80 p-4">
                     <div className="flex items-center gap-2 text-red-700">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-5">
