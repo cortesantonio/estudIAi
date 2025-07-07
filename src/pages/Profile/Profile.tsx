@@ -1,6 +1,8 @@
+import { useNavigate } from "react-router-dom"
 import { AsideMenu } from "../../components/asideMenu"
 
 export const Profile = () => {
+    const navigate = useNavigate()
     return (
         <div className="bg-gray-100 dark:bg-gray-700">
             <AsideMenu />
@@ -12,12 +14,12 @@ export const Profile = () => {
                         <nav>
                             <ol className="flex flex-wrap pt-1 pl-2 pr-4 mr-12 bg-transparent rounded-lg sm:mr-16">
                                 <li className="leading-normal text-sm">
-                                    <a className="opacity-50" href="javascript:;">Pages</a>
+                                    <a className="opacity-50" href="javascript:;">Inicio</a>
                                 </li>
                                 <li className="text-sm pl-2 capitalize leading-normal before:float-left before:pr-2 before:content-['/']"
                                     aria-current="page">Profile</li>
                             </ol>
-                            <h6 className="mb-2 ml-2 font-bold text-white capitalize">Profile</h6>
+                            <h6 className="mb-2 ml-2 font-bold text-white capitalize">Perfil</h6>
                         </nav>
 
 
@@ -48,7 +50,7 @@ export const Profile = () => {
                                 <div className="relative right-0">
                                     <ul className="relative flex flex-wrap p-1 list-none bg-transparent rounded-xl gap-4" nav-pills role="tablist">
                                         <li className="z-30 flex-auto text-center  ">
-                                            <a className="z-30  w-full px-0 py-1 mb-0 transition-colors border-0 rounded-lg ease-soft-in-out  text-slate-700 flex justify-center cursor-pointer lg:bg-gray-100/50 lg:hover:bg-white bg-gray-100 hover:bg-gray-200"
+                                            <a className="z-30  w-full px-0 py-1 mb-0 transition-colors border-0 rounded-lg ease-soft-in-out  text-slate-700 flex justify-center cursor-pointer dark:bg-gray-600 dark:lg:hover:bg-gray-700 lg:bg-gray-100/50 lg:hover:bg-white bg-gray-100 hover:bg-gray-200"
                                                 aria-selected="false">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="dark:fill-white" height="24px" viewBox="0 -960 960 960" width="24px"
                                                 >
@@ -70,7 +72,7 @@ export const Profile = () => {
                                             </a>
                                         </li>
                                         <li className="z-30 flex-auto text-center  ">
-                                            <a className="z-30  w-full px-0 py-1 mb-0 transition-colors border-0 rounded-lg ease-soft-in-out  text-slate-700 flex justify-center cursor-pointer lg:bg-red-100/50 lg:hover:bg-red-200 bg-red-100 hover:bg-red-200"
+                                            <a className="z-30  w-full px-0 py-1 mb-0 transition-colors border-0 rounded-lg ease-soft-in-out  text-slate-700 flex justify-center cursor-pointer   bg-red-700/20 hover:bg-red-700/40"
                                                 aria-selected="false"
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="red">
@@ -209,7 +211,7 @@ export const Profile = () => {
                                                 <p className="mb-12">Organiza a tus amigos o compañeros y empieza el quiz en segundos.</p>
                                                 <button
                                                     className="mt-auto mb-0 inline-flex items-center justify-center px-6 py-3 font-semibold leading-normal text-sm text-white transition-all duration-200 ease-in-out bg-gradient-to-tl from-purple-700 to-pink-500 rounded-lg shadow-md  hover:saturate-50 cursor-pointer "
-                                                    onClick={() => alert("Funcionalidad para crear grupo y comenzar quiz")}
+                                                    onClick={() => navigate("/groups")}
                                                 >
                                                     <svg className="w-6 h-6  text-white mr-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                                         <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4.243a1 1 0 1 0-2 0V11H7.757a1 1 0 1 0 0 2H11v3.243a1 1 0 1 0 2 0V13h3.243a1 1 0 1 0 0-2H13V7.757Z" clip-rule="evenodd" />
@@ -293,19 +295,19 @@ export const Profile = () => {
                                                 <tr>
                                                     <th className="px-6 py-3 font-bold tracking-normal text-left uppercase align-middle bg-transparent border-b letter border-b-solid text-xxs whitespace-nowrap border-b-gray-200 text-slate-400 opacity-70">GRUPOS</th>
                                                     <th className="px-6 py-3 pl-2 font-bold tracking-normal text-left uppercase align-middle bg-transparent border-b letter border-b-solid text-xxs whitespace-nowrap border-b-gray-200 text-slate-400 opacity-70">MIEMBROS</th>
-                                                    <th className="px-6 py-3 font-bold tracking-normal text-center uppercase align-middle bg-transparent border-b letter border-b-solid text-xxs whitespace-nowrap border-b-gray-200 text-slate-400 opacity-70">Sesiones</th>
-                                                    <th className="px-6 py-3 font-bold tracking-normal text-center uppercase align-middle bg-transparent border-b letter border-b-solid text-xxs whitespace-nowrap border-b-gray-200 text-slate-400 opacity-70">PROGRESO</th>
+                                                    <th className="px-6 py-3 font-bold tracking-normal text-center uppercase align-middle bg-transparent border-b letter border-b-solid text-xxs whitespace-nowrap border-b-gray-200 text-slate-400 opacity-70">Juegos pendientes</th>
+                                                    <th className="px-6 py-3 font-bold tracking-normal text-center uppercase align-middle bg-transparent border-b letter border-b-solid text-xxs whitespace-nowrap border-b-gray-200 text-slate-400 opacity-70"></th>
                                                 </tr>
                                             </thead>
                                             <tbody >
                                                 <tr className=" mb-4">
                                                     <td className="p-2 align-middle bg-transparent border-b whitespace-nowrap">
                                                         <div className="flex px-2 py-1">
-                                                            <div >
+                                                            <div className="size-10 aspect-square mr-2" >
                                                                 <img src="https://images.icon-icons.com/1617/PNG/512/3700472-biology-chemical-chemistry-ecology-flask-laboratory-science_108761.png" className="inline-flex items-center justify-center mr-4 text-white transition-all duration-200 ease-soft-in-out text-sm h-9 w-9 rounded-xl bg-white" alt="xd" />
                                                             </div>
                                                             <div className="flex flex-col justify-center">
-                                                                <h6 className="mb-0 leading-normal text-sm">Soft UI XD Version</h6>
+                                                                <h6 className="mb-0 leading-normal text-sm ">Bioquímica certamen 3</h6>
                                                             </div>
                                                         </div>
                                                     </td>
@@ -342,7 +344,7 @@ export const Profile = () => {
                                                         </div>
                                                     </td>
                                                     <td className="p-2 leading-normal text-center align-middle bg-transparent border-b text-sm whitespace-nowrap">
-                                                        <span className="font-semibold leading-tight text-xs"> $14,000 </span>
+                                                        <span className="font-semibold leading-tight text-xs"> 4 </span>
                                                     </td>
                                                     <td className="p-2 align-middle bg-transparent border-b whitespace-nowrap">
                                                         <div className="w-3/4 mx-auto">
@@ -357,65 +359,7 @@ export const Profile = () => {
                                                         </div>
                                                     </td>
                                                 </tr>
-                                                <tr className=" mb-4">
-                                                    <td className="p-2 align-middle bg-transparent border-b whitespace-nowrap">
-                                                        <div className="flex px-2 py-1">
-                                                            <div >
-                                                                <img src="https://images.icon-icons.com/1617/PNG/512/3700472-biology-chemical-chemistry-ecology-flask-laboratory-science_108761.png" className="inline-flex items-center justify-center mr-4 text-white transition-all duration-200 ease-soft-in-out text-sm h-9 w-9 rounded-xl bg-white" alt="xd" />
-                                                            </div>
-                                                            <div className="flex flex-col justify-center">
-                                                                <h6 className="mb-0 leading-normal text-sm">Soft UI XD Version</h6>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="p-2 align-middle bg-transparent border-b whitespace-nowrap">
-                                                        <div className="mt-2 avatar-group">
-                                                            <a className="relative z-20 inline-flex items-center justify-center w-6 h-6 text-white transition-all duration-200 border-2 border-white border-solid rounded-full ease-soft-in-out text-xs hover:z-30" data-target="tooltip_trigger" data-placement="bottom">
-                                                                <img src="https://avatar.iran.liara.run/public" className="w-full rounded-full" alt="team1" />
-                                                            </a>
-                                                            <div data-target="tooltip" className="hidden px-2 py-1 text-white bg-black rounded-lg text-sm" role="tooltip">
-                                                                Ryan Tompson
-                                                                <div className="invisible absolute h-2 w-2 bg-inherit before:visible before:absolute before:h-2 before:w-2 before:rotate-45 before:bg-inherit before:content-['']" data-popper-arrow></div>
-                                                            </div>
-                                                            <a className="relative z-20 inline-flex items-center justify-center w-6 h-6 -ml-4 text-white transition-all duration-200 border-2 border-white border-solid rounded-full ease-soft-in-out text-xs hover:z-30" data-target="tooltip_trigger" data-placement="bottom">
-                                                                <img src="https://avatar.iran.liara.run/public" className="w-full rounded-full" alt="team2" />
-                                                            </a>
-                                                            <div data-target="tooltip" className="hidden px-2 py-1 text-white bg-black rounded-lg text-sm" role="tooltip">
-                                                                Romina Hadid
-                                                                <div className="invisible absolute h-2 w-2 bg-inherit before:visible before:absolute before:h-2 before:w-2 before:rotate-45 before:bg-inherit before:content-['']" data-popper-arrow></div>
-                                                            </div>
-                                                            <a className="relative z-20 inline-flex items-center justify-center w-6 h-6 -ml-4 text-white transition-all duration-200 border-2 border-white border-solid rounded-full ease-soft-in-out text-xs hover:z-30" data-target="tooltip_trigger" data-placement="bottom">
-                                                                <img src="https://avatar.iran.liara.run/public" className="w-full rounded-full" alt="team3" />
-                                                            </a>
-                                                            <div data-target="tooltip" className="hidden px-2 py-1 text-white bg-black rounded-lg text-sm" role="tooltip">
-                                                                Alexander Smith
-                                                                <div className="invisible absolute h-2 w-2 bg-inherit before:visible before:absolute before:h-2 before:w-2 before:rotate-45 before:bg-inherit before:content-['']" data-popper-arrow></div>
-                                                            </div>
-                                                            <a className="relative z-20 inline-flex items-center justify-center w-6 h-6 -ml-4 text-white transition-all duration-200 border-2 border-white border-solid rounded-full ease-soft-in-out text-xs hover:z-30" data-target="tooltip_trigger" data-placement="bottom">
-                                                                <img src="https://avatar.iran.liara.run/public" className="w-full rounded-full" alt="team4" />
-                                                            </a>
-                                                            <div data-target="tooltip" className="hidden px-2 py-1 text-white bg-black rounded-lg text-sm" role="tooltip">
-                                                                Jessica Doe
-                                                                <div className="invisible absolute h-2 w-2 bg-inherit before:visible before:absolute before:h-2 before:w-2 before:rotate-45 before:bg-inherit before:content-['']" data-popper-arrow></div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="p-2 leading-normal text-center align-middle bg-transparent border-b text-sm whitespace-nowrap">
-                                                        <span className="font-semibold leading-tight text-xs"> $14,000 </span>
-                                                    </td>
-                                                    <td className="p-2 align-middle bg-transparent border-b whitespace-nowrap">
-                                                        <div className="w-3/4 mx-auto">
-                                                            <div>
-                                                                <div>
-                                                                    <span className="font-semibold leading-tight text-xs">100%</span>
-                                                                </div>
-                                                            </div>
-                                                            <div className="text-xs h-0.75 w-30 m-0 flex overflow-visible rounded-lg bg-gray-200">
-                                                                <div className="duration-600 ease-soft bg-gradient-to-tl from-blue-600 to-cyan-400 -mt-0.38 -ml-px flex h-1.5  flex-col justify-center overflow-hidden whitespace-nowrap rounded bg-fuchsia-500 text-center text-white transition-all w-4/5"></div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                </tr>
+
                                             </tbody>
                                         </table>
                                     </div>
@@ -447,7 +391,7 @@ export const Profile = () => {
                                             </span>
 
                                             <div className="ml-11 pt-1.4 lg:max-w-120 relative -top-1.5 w-auto">
-                                                <h6 className="mb-0 font-semibold leading-normal text-sm text-slate-700 dark:text-white">Juanito Perez, completó un quiz en Grupo 1.</h6>
+                                                <h6 className="mb-0 font-semibold leading-normal text-sm text-slate-700 dark:text-white">Juanito Perez, completó un quiz en Bioquímica certamen 3.</h6>
                                                 <p className="mt-1 mb-0 font-semibold leading-tight text-xs text-slate-400 dark:text-white/70 ">22 DEC 7:20 PM</p>
                                             </div>
                                         </div>
