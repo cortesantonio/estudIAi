@@ -5,4 +5,6 @@ export interface User {
     birthdate: string,
     name: string,
     password?: string
+
+    admin?: User;
 }
