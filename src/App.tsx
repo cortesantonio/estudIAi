@@ -5,6 +5,7 @@ import { Registro } from './pages/Auth/Registro'
 import { Login } from './pages/Auth/Login'
 import { Profile } from './pages/Profile/Profile'
 import { Groups } from './pages/Group/Groups'
+import { ViewGroup } from './pages/Group/ViewGroup'
 function App() {
   return (
     <Router>
@@ -14,7 +15,7 @@ function App() {
         <Route path="/auth/register" element={<Registro />} />
         <Route path='/profile' element={< Profile />} />
         <Route path='/groups' element={< Groups />} />
-
+        <Route path='/group/:id' element={<ViewGroup />} />
       </Routes>
     </Router>
   )

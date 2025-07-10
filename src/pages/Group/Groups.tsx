@@ -53,7 +53,6 @@ export const Groups = () => {
         async function fetchGroups() {
             try {
                 const response = await GetGroupsOf();
-                console.log(response)
                 setGroups(response);
             } catch (error) {
                 console.error('Error al obtener los grupos:', error);

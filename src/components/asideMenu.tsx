@@ -3,7 +3,6 @@ import { useState } from "react"
 export const AsideMenu = () => {
     const [asideOpen, setAsideOpen] = useState(false);
     const [msjAviso, setMsjAviso] = useState(true)
-
     return (
         <>
 
@@ -79,7 +78,7 @@ export const AsideMenu = () => {
                                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="dark:fill-gray-300 fill-gray-500"><path d="M212-86q-53 0-89.5-36.5T86-212v-536q0-53 36.5-89.5T212-874h276v126H212v536h276v126H212Zm415-146-88-89 96-96H352v-126h283l-96-96 88-89 247 248-247 248Z" /></svg>
                                 <span className="flex-1 ms-3 whitespace-nowrap">Sign Up</span>
                             </a>
-                        </li>
+                        </li>                        
                     </ul>
                     <div id="dropdown-cta" className="p-4 mt-6 rounded-lg bg-blue-50 dark:bg-blue-900"
                         hidden={!msjAviso}
