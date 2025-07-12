@@ -1,8 +1,18 @@
 import { useNavigate } from "react-router-dom"
 import { AsideMenu } from "../../components/asideMenu"
+import { useEffect, useState } from "react"
 
 export const Profile = () => {
     const navigate = useNavigate()
+    const [user, setUser] = useState<any>();
+    useEffect(() => {
+        const session = localStorage.getItem("user")
+        if (session) {
+            setUser(JSON.parse(session))
+        }
+
+    }, [])
+
     return (
         <div className="bg-gray-100 dark:bg-gray-700">
             <AsideMenu />
@@ -42,7 +52,7 @@ export const Profile = () => {
                             </div>
                             <div className="flex-none w-auto max-w-full px-3 my-auto">
                                 <div className="h-full">
-                                    <h5 className="mb-1 font-semibold">Alec Thompson</h5>
+                                    <h5 className="mb-1 font-semibold capitalize">{user?.name}</h5>
                                     <p className="mb-0  leading-normal text-sm">Quimica y Farmacia</p>
                                 </div>
                             </div>
@@ -79,7 +89,7 @@ export const Profile = () => {
                                                     <path d="M212-86q-53 0-89.5-36.5T86-212v-536q0-53 36.5-89.5T212-874h276v126H212v536h276v126H212Zm415-146-88-89 96-96H352v-126h283l-96-96 88-89 247 248-247 248Z" />
                                                 </svg>
 
-                                                <span className="ml-1 text-red-600 font-semibold  ">Cerrar Sesión</span>
+                                                <span className="ml-1 text-red-600 font-semibold">Cerrar Sesión</span>
                                             </a>
                                         </li>
                                     </ul>
