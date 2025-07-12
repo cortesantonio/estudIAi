@@ -1,69 +1,59 @@
-# React + TypeScript + Vite
+# 🎓 estudIAi - Plataforma de Estudio Colaborativo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **Plataforma web para crear grupos de estudio, realizar quizzes y compartir conocimientos de manera colaborativa.**
 
-Currently, two official plugins are available:
+## 📋 Descripción
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+estudIAi es una aplicación web moderna diseñada para facilitar el aprendizaje colaborativo. Permite a los usuarios crear grupos de estudio, compartir materiales educativos, realizar quizzes interactivos y hacer seguimiento del progreso individual y grupal.
 
-## Expanding the ESLint configuration
+## ✨ Características Principales
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 🏠 **Página de Inicio**
+- Landing page atractiva con información del proyecto
+- Navegación intuitiva y responsive
+- Diseño moderno con modo oscuro/claro
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 👥 **Gestión de Grupos**
+- **Crear grupos de estudio** con nombre y color personalizado
+- **Unirse a grupos** mediante códigos de invitación
+- **Vista detallada de grupos** con información de miembros
+- **Sistema de roles** (Administrador y Miembros)
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### 📚 **Materiales de Estudio**
+- **Documentos PDF** compartidos por grupo
+- **Visualizador integrado** para leer documentos
+- **Descarga de materiales** para estudio offline
+- **Herramientas de anotación** (resaltar, agregar notas)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 🎯 **Sistema de Quizzes**
+- **Quizzes personalizados** por grupo
+- **Preguntas de opción múltiple** y desarrollo
+- **Historial de resultados** y revisión de respuestas
+- **Modo práctica** con flashcards interactivas
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 💬 **Debates y Colaboración**
+- **Foro de discusión** por grupo
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 📊 **Análisis y Progreso**
+- **Estadísticas individuales** de rendimiento
+- **Clasificación grupal** y global
+- **Gráficos de progreso** por categorías
+- **Reportes detallados** exportables
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 🎮 **Unirse a Juegos**
+- **Sistema de códigos** para unirse a quizzes
+- **Juegos recientes** para acceso rápido
+- **Participación en tiempo real**
+
+## 🛠️ Tecnologías Utilizadas
+
+### **Frontend**
+- **React 18** - Biblioteca de interfaz de usuario
+- **TypeScript** - Tipado estático para mayor robustez
+- **Tailwind CSS** - Framework de CSS utility-first
+- **React Router** - Navegación SPA
+- **React Hook Form** - Manejo de formularios
+- **Vite** - Build tool y servidor de desarrollo
+
+
+#
