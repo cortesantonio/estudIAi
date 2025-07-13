@@ -4,9 +4,10 @@ import { useParams } from "react-router-dom"
 import { GetGroup } from "../../services/groupService"
 import type { Group } from "../../interfaces/Group"
 import type { Quiz } from "../../interfaces/Quizzes"
+import { Chat } from "./tabsViewGroup/tabChat"
 
 const TABS = [
-  { key: "debates", label: "Debates" },
+  { key: "chat", label: "Chat grupal" },
   { key: "quizzes", label: "Quizzes" },
   { key: "integrantes", label: "Integrantes" },
   { key: "resultados", label: "Resultados" },
@@ -124,34 +125,9 @@ export const ViewGroup = () => {
         </div>
         {/* Contenido de cada tab */}
         <div className="w-full px-6 mx-auto pb-12">
-          {tab === "debates" && (
-            <section className="flex flex-col gap-6">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                <h3 className="font-bold">Debates del Grupo</h3>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded">Crear Nueva Publicación</button>
-              </div>
-              <div className="space-y-4">
-                <div className="bg-white dark:bg-gray-800 rounded shadow p-4">
-                  <h4 className="font-semibold">¿Dudas sobre el Tema 1?</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">Iniciado por <b>Usuario1</b> - 3 respuestas</p>
-                  <div className="mt-2 border-t pt-2 space-y-2">
-                    <div className="text-sm"><b>Usuario2:</b> Yo tampoco entendí la parte de ejemplos.</div>
-                    <div className="text-sm"><b>Usuario3:</b> ¿Alguien tiene un resumen?</div>
-                    <div className="text-sm"><b>Admin:</b> Subí un PDF con ejemplos en Materiales.</div>
-                  </div>
-                  <button className="mt-2 text-blue-600 text-xs">Responder</button>
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded shadow p-4">
-                  <h4 className="font-semibold">Sugerencias para el Quiz</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">Iniciado por <b>Usuario4</b> - 1 respuesta</p>
-                  <div className="mt-2 border-t pt-2 space-y-2">
-                    <div className="text-sm"><b>Admin:</b> ¡Gracias por la sugerencia!</div>
-                  </div>
-                  <button className="mt-2 text-blue-600 text-xs">Responder</button>
-                </div>
-              </div>
-            </section>
-          )}
+
+          <Chat isOpen={tab === "chat"} />
+
           {tab === "quizzes" && (
             <section className="flex flex-col gap-8">
               {/* Quizzes Disponibles */}
@@ -164,7 +140,16 @@ export const ViewGroup = () => {
                   </button>
                 </div>
 
-                <div className="flex gap-4 overflow-auto pb-2">
+                <div className="flex gap-4 overflow-auto pb-2
+                [&::-webkit-scrollbar]:w-2
+                [&::-webkit-scrollbar-track]:rounded-lg
+              [&::-webkit-scrollbar-track]:bg-gray-100
+                [&::-webkit-scrollbar-thumb]:rounded-lg
+              [&::-webkit-scrollbar-thumb]:bg-gray-300
+              dark:[&::-webkit-scrollbar-track]:bg-gray-600
+                dark:[&::-webkit-scrollbar-thumb]:bg-gray-800 
+                
+                ">
                   {loading && Array.from({ length: 3 }).map((_, id) => <SkeletonCard key={id} />)}
                   {quizzes && quizzes.map((quiz) => (
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col gap-2 min-w-[250px] sm:min-w-[350px]">
@@ -174,11 +159,12 @@ export const ViewGroup = () => {
                         <span className="font-semibold">{quiz?.quatityQuestion || 0} preguntas</span>
                         <span className="font-semibold">Duración: {quiz?.duration || 0} min</span>
                       </div>
-                      <button className="px-3 py-1 text-white rounded text-sm w-fit flex gap-1 items-center cursor-pointer  bg-blue-600 hover:bg-blue-700 ">
+                      <button className="px-3 py-1 text-white rounded text-sm w-fit flex gap-1 items-center cursor-pointer  bg-blue-600 hover:bg-blue-700  ">
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
-                        Iniciar Quiz</button>
+                        Iniciar Quiz
+                      </button>
                     </div>
                   ))}
 
@@ -189,13 +175,22 @@ export const ViewGroup = () => {
               {/* Flashcards / Modo Práctica */}
               <div>
                 <h3 className="font-bold mb-2 text-xl dark:text-white">Flashcards</h3>
-                <div className="flex flex-wrap gap-4">
-
+                <div className="flex gap-4 overflow-y-auto pb-2
+                [&::-webkit-scrollbar]:w-2
+                [&::-webkit-scrollbar-track]:rounded-lg
+              [&::-webkit-scrollbar-track]:bg-gray-100
+                [&::-webkit-scrollbar-thumb]:rounded-lg
+              [&::-webkit-scrollbar-thumb]:bg-gray-300
+              dark:[&::-webkit-scrollbar-track]:bg-gray-600
+                dark:[&::-webkit-scrollbar-thumb]:bg-gray-800 
+                ">
                   <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-2 py-6 flex flex-col justify-center items-center gap-2 min-w-[200px] sm:min-w-[300px]  max-w-sm">
                     <div className="font-semibold mb-2 dark:text-white text-wrap text-center">Lorem ipsum dolor sit amet
                       consectetur adipisicing elit. Tenetur, voluptatum.</div>
                     <button className="px-3 py-1  bg-blue-600 hover:bg-blue-700  text-white rounded text-sm cursor-pointer">Ver Respuesta</button>
                   </div>
+
+
                 </div>
               </div>
               {/* Historial de Quizzes */}
@@ -225,7 +220,7 @@ export const ViewGroup = () => {
                           </p>
                         </td>
                         <td className="px-3 py-2 whitespace-nowrap">
-                          <button className="hover:bg-gray-600 p-1 rounded-full cursor-pointer">
+                          <button className="hover:bg-gray-300 dark:hover:bg-gray-600 p-1 rounded-full cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="dark:fill-white fill-black"><path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z" /></svg>
                           </button>
                         </td>
@@ -239,7 +234,7 @@ export const ViewGroup = () => {
                             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#999999"><path d="M280-440h400v-80H280v80ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" /></svg>                          </p>
                         </td>
                         <td className="px-3 py-2 whitespace-nowrap">
-                          <button className="hover:bg-gray-600 p-1 rounded-full cursor-pointer">
+                          <button className="hover:bg-gray-300 dark:hover:bg-gray-600 p-1 rounded-full cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="dark:fill-white fill-black"><path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z" /></svg>
                           </button>
                         </td>
