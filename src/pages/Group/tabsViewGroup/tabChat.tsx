@@ -1,15 +1,18 @@
+import type { Group } from "../../../interfaces/Group";
+
 interface ChatProps {
     isOpen: boolean;
+    group: Partial<Group>;
 }
 
-export const Chat = ({ isOpen }: ChatProps) => {
+export const Chat = ({ isOpen, group }: ChatProps) => {
 
-    if (!isOpen) { return }
-
+    if (!isOpen) return null;
+    if (!group) return null;
 
     return (<div className="border rounded-lg overflow-hidden m-4 shadow-lg">
         <div className="sticky top-0 z-50  border-b  border-gray-300 bg-white py-5 px-8 text-left text-sm  text-gray-800">
-            <h4 className=" inline-block py-1 text-left font-sans font-semibold normal-case">Lara Abegnale</h4>
+            <h4 className=" inline-block py-1 text-left font-sans font-semibold normal-case">Chat grupal de {group.name}</h4>
         </div>
         <div className="flex-grow px-8 pt-8 text-left text-gray-700">
             <div className="relative mb-6 text-center">
@@ -41,7 +44,7 @@ export const Chat = ({ isOpen }: ChatProps) => {
             </div>
 
             <div className="relative mb-6 text-center">
-                <span className="relative bg-white px-2 text-sm text-gray-600">Yesterday</span>
+                <span className="relative  text-gray-600 dark:text-gray-400">Yesterday</span>
             </div>
 
             <div className="relative mb-6 text-left">
@@ -81,18 +84,6 @@ export const Chat = ({ isOpen }: ChatProps) => {
             </div>
 
             <div className="relative mb-6 text-left">
-                <div className="text-gray-700">
-                    <div className="absolute top-0 left-0">
-                        <img src="/images/y9s3xOJV6rnQPKIrdPYJy.png" alt="" className="float-right inline-block h-6 w-6 sm:h-12 sm:w-12 rounded-full" />
-                    </div>
-                    <div className="relative float-left ml-8 sm:ml-16 inline-block rounded-md bg-gray-200 py-3 px-4">
-                        <div className="h-6 pt-2">
-                            <span className="rounded-full float-left mx-px h-2 w-2 bg-gray-500"></span>
-                            <span className="rounded-full float-left mx-px h-2 w-2 bg-gray-500"></span>
-                            <span className="rounded-full float-left mx-px h-2 w-2 bg-gray-500"></span>
-                        </div>
-                    </div>
-                </div>
                 <div className="clear-both flex text-gray-700"></div>
             </div>
             <div className="mt-4  flex items-start border-t  border-gray-300 sm:p-8 py-4 text-left  text-gray-700">
