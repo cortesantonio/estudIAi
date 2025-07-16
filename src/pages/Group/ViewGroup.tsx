@@ -5,6 +5,7 @@ import { GetGroup } from "../../services/groupService"
 import type { Group } from "../../interfaces/Group"
 import type { Quiz } from "../../interfaces/Quizzes"
 import { Chat } from "./tabsViewGroup/tabChat"
+import { GenerateQuizModal } from "./GenerateQuizModal"
 
 const TABS = [
   { key: "chat", label: "Chat grupal" },
@@ -13,14 +14,14 @@ const TABS = [
   { key: "resultados", label: "Resultados" },
   { key: "progreso", label: "Progreso Individual" },
 ]
-
 export const ViewGroup = () => {
   const [loading, setLoading] = useState(true)
-
   const [tab, setTab] = useState("quizzes")
   const { id } = useParams();
   const [group, setGroup] = useState<Partial<Group>>();
   const [quizzes, setQuizzes] = useState<Partial<Quiz[]>>([]);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+
   useEffect(() => {
     async function fetchGroup(id: string) {
       try {
@@ -35,7 +36,6 @@ export const ViewGroup = () => {
     }
     fetchGroup(id || "")
   }, [id])
-
   useEffect(() => (
     setQuizzes([{
       id: 1,
@@ -45,11 +45,12 @@ export const ViewGroup = () => {
     }])
 
   ), [id])
-
   setTimeout(() => {
     setLoading(false)
   }, 2000);
+  const handleCloseModal = () => {
 
+  }
   const SkeletonCard = () => {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col gap-2 min-w-[250px] sm:min-w-[350px]">
@@ -67,6 +68,9 @@ export const ViewGroup = () => {
   return (
     <div className="bg-gray-100 dark:bg-gray-700 min-h-screen">
       <AsideMenu />
+      <GenerateQuizModal isOpen={modalIsOpen} onClose={() => setModalIsOpen(false)} onSuccess={() => { }} group={group as Group} />
+
+
       <main className="ease-soft-in-out lg:ml-68.5 relative min-h-screen rounded-xl transition-all duration-200 pt-8">
         {/* Header mejorado con botón de material */}
         <div className="w-full px-6 mx-auto">
@@ -126,7 +130,7 @@ export const ViewGroup = () => {
         {/* Contenido de cada tab */}
         <div className="w-full px-6 mx-auto pb-12">
 
-          <Chat isOpen={tab === "chat"} />
+          <Chat isOpen={tab === "chat"} group={group as Group} />
 
           {tab === "quizzes" && (
             <section className="flex flex-col gap-8">
@@ -134,7 +138,8 @@ export const ViewGroup = () => {
               <div>
                 <div className="mb-4 flex gap-4 items-center justify-between lg:justify-start ">
                   <h3 className="font-bold text-xl dark:text-white">Quizzes Disponibles</h3>
-                  <button className="px-3 py-2 sm:w-50 bg-blue-600 hover:bg-blue-700  text-white rounded-lg font-semibold shadow transition-colors text-sm flex justify-center items-center gap-2" title="Descargar material de estudio">
+                  <button className="px-3 py-2 sm:w-50 bg-blue-600 hover:bg-blue-700  text-white rounded-lg font-semibold shadow transition-colors text-sm flex justify-center items-center gap-2"
+                    title="Generar quizzes con ia" onClick={() => setModalIsOpen(!modalIsOpen)}>
                     <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#fff"><path d="M331-651 211-771l57-57 120 120-57 57Zm149-95v-170h80v170h-80Zm291 535L651-331l57-57 120 120-57 57Zm-63-440-57-57 120-120 57 57-120 120Zm38 171v-80h170v80H746ZM205-92 92-205q-12-12-12-28t12-28l363-364q35-35 85-35t85 35q35 35 35 85t-35 85L261-92q-12 12-28 12t-28-12Zm279-335-14.5-14-14.5-14-14-14-14-14 28 28 29 28ZM233-176l251-251-57-56-250 250 56 57Z" /></svg>
                     Generar con IA
                   </button>
