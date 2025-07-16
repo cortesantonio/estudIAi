@@ -1,5 +1,13 @@
 import type { Group } from "./Group";
 
+export interface ParamsNewSession {
+    focusing: string; /* enfoque, conceptos, generalidades, muy especificos, variados */
+    quantity: number;
+    title: string;
+    typeOptions: string[]; /* seleccion multiple, verdadero y falso, seleccion unica, respuestas corta  */
+    group?: Partial<Group>;
+}
+
 export interface Session {
     id: number;
     studyGroupId: number;
