@@ -41,15 +41,11 @@ export interface Quiz {
 export interface Question {
     id: number;
     quizId: number;
+    quiz?: Quiz;
     text: string;
-    options: Option[];
-}
-
-export interface Option {
-    id: number;
-    questionId: number;
-    text: string;
-    isCorrect: boolean;
+    typelogy: string;
+    options: string[];
+    correctOption: number;
 }
 
 export interface Answer {
