@@ -15,7 +15,7 @@ export const CreateGroup = async (datos: Group) => {
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.message || 'Error en el login');
+            throw new Error(data.message || 'Error al crear el grupo.');
         }
 
         return data;
@@ -95,3 +95,4 @@ export const GetMembersOfGroups = async (id: string) => {
         throw new Error(error.message || 'Error al conectar con el servidor');
     }
 }
+
