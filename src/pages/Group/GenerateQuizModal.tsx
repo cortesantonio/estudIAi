@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { ParamsNewSession } from "../../interfaces/Quizzes";
 import type { Group } from "../../interfaces/Group";
@@ -22,6 +22,11 @@ export const GenerateQuizModal = ({ isOpen, onClose, onSuccess, group }: Generat
         setValue,
     } = useForm<ParamsNewSession>();
 
+    useEffect(() => {
+        setValue("group", group);
+        console.log("group", group);
+    }, [group])
+
     const [quantity, setQuantity] = useState(5); // Estado para el contador
 
     const handleClose = () => {
@@ -32,7 +37,7 @@ export const GenerateQuizModal = ({ isOpen, onClose, onSuccess, group }: Generat
     const handleQuantityChange = (newVal: number) => {
         const clamped = Math.max(1, Math.min(15, newVal));
         setQuantity(clamped);
-        setValue("quantity", clamped); // sincroniza con react-hook-form
+        setValue("quantity", clamped);
     };
 
     const onSubmit = async (data: ParamsNewSession) => {
@@ -41,14 +46,10 @@ export const GenerateQuizModal = ({ isOpen, onClose, onSuccess, group }: Generat
             const response = await CreateQuizzes(data)
             console.log(response)
             setLoading(false)
-
-
         } catch (error) {
             console.log(error)
             setLoading(false)
-
         }
-
         onSuccess?.();
     };
 
