@@ -48,9 +48,7 @@ export const ViewGroup = () => {
   setTimeout(() => {
     setLoading(false)
   }, 2000);
-  const handleCloseModal = () => {
 
-  }
   const SkeletonCard = () => {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col gap-2 min-w-[250px] sm:min-w-[350px]">
@@ -108,7 +106,7 @@ export const ViewGroup = () => {
               <div className="w-full h-10 sm:w-50 rounded-lg bg-gray-500 animate-pulse"></div>
             </> :
               <>
-                <button className="w-full h-10 sm:w-50 bg-blue-600 hover:bg-blue-700  text-white rounded-lg font-semibold shadow transition-colors text-sm flex justify-center items-center gap-2" title="Descargar material de estudio">
+                <button className="w-full h-10 sm:w-50 bg-blue-600 hover:bg-blue-700  text-white rounded-lg font-semibold shadow transition-colors text-sm flex justify-center items-center gap-2 cursor-pointer" title="Descargar material de estudio">
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" /></svg>
                   Descargar material
                 </button></>}
@@ -138,7 +136,7 @@ export const ViewGroup = () => {
               <div>
                 <div className="mb-4 flex gap-4 items-center justify-between lg:justify-start ">
                   <h3 className="font-bold text-xl dark:text-white">Quizzes Disponibles</h3>
-                  <button className="px-3 py-2 sm:w-50 bg-blue-600 hover:bg-blue-700  text-white rounded-lg font-semibold shadow transition-colors text-sm flex justify-center items-center gap-2"
+                  <button className="px-3 py-2 sm:w-50 bg-blue-600 hover:bg-blue-700  text-white rounded-lg font-semibold shadow transition-colors text-sm flex justify-center items-center gap-2 cursor-pointer"
                     title="Generar quizzes con ia" onClick={() => setModalIsOpen(!modalIsOpen)}>
                     <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#fff"><path d="M331-651 211-771l57-57 120 120-57 57Zm149-95v-170h80v170h-80Zm291 535L651-331l57-57 120 120-57 57Zm-63-440-57-57 120-120 57 57-120 120Zm38 171v-80h170v80H746ZM205-92 92-205q-12-12-12-28t12-28l363-364q35-35 85-35t85 35q35 35 35 85t-35 85L261-92q-12 12-28 12t-28-12Zm279-335-14.5-14-14.5-14-14-14-14-14 28 28 29 28ZM233-176l251-251-57-56-250 250 56 57Z" /></svg>
                     Generar con IA

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import type { ParamsNewSession } from "../../interfaces/Quizzes";
 import type { Group } from "../../interfaces/Group";
+import { CreateQuizzes } from "../../services/quizzesService";
 
 interface GenerateQuizModalProps {
     isOpen: boolean;
@@ -11,6 +12,8 @@ interface GenerateQuizModalProps {
 }
 
 export const GenerateQuizModal = ({ isOpen, onClose, onSuccess, group }: GenerateQuizModalProps) => {
+    const [loading, setLoading] = useState(false)
+
     const {
         register,
         handleSubmit,
@@ -32,9 +35,20 @@ export const GenerateQuizModal = ({ isOpen, onClose, onSuccess, group }: Generat
         setValue("quantity", clamped); // sincroniza con react-hook-form
     };
 
-    const onSubmit = (data: ParamsNewSession) => {
-        console.log(data);
-        handleClose();
+    const onSubmit = async (data: ParamsNewSession) => {
+        setLoading(true)
+        try {
+            const response = await CreateQuizzes(data)
+            console.log(response)
+            setLoading(false)
+
+
+        } catch (error) {
+            console.log(error)
+            setLoading(false)
+
+        }
+
         onSuccess?.();
     };
 
@@ -58,7 +72,6 @@ export const GenerateQuizModal = ({ isOpen, onClose, onSuccess, group }: Generat
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                         <svg xmlns="http://www.w3.org/2000/svg" height="32px" viewBox="0 -960 960 960" width="32px" className="dark:fill-yellow-300 fill-yellow-500"><path d="M331-651 211-771l57-57 120 120-57 57Zm149-95v-170h80v170h-80Zm291 535L651-331l57-57 120 120-57 57Zm-63-440-57-57 120-120 57 57-120 120Zm38 171v-80h170v80H746ZM205-92 92-205q-12-12-12-28t12-28l363-364q35-35 85-35t85 35q35 35 35 85t-35 85L261-92q-12 12-28 12t-28-12Zm279-335-14.5-14-14.5-14-14-14-14-14 28 28 29 28ZM233-176l251-251-57-56-250 250 56 57Z" /></svg>
                         Ajusta los parametros de generación.
-                        {group.inviteCode}
                     </h2>
 
                     {/* Documento (solo label) */}
@@ -155,17 +168,19 @@ export const GenerateQuizModal = ({ isOpen, onClose, onSuccess, group }: Generat
                             className="w-full h-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white px-3 shadow-sm focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600"
                         >
                             <option value="">Selecciona un enfoque</option>
-                            <option value="conceptos">Conceptos</option>
+                            <option value="conceptos del tema">Conceptos</option>
                             <option value="generalidades">Generalidades</option>
                             <option value="muy especificos">Muy específicos</option>
-                            <option value="variados">Variados</option>
+                            <option value="variados">Variados (Conceptos, generalidades y muy específicos)</option>
                         </select>
                         {errors.focusing && (
                             <p className="text-red-400 text-xs mt-1">{errors.focusing.message}</p>
                         )}
                     </div>
+                    <div>
+                        {loading && <p>cargando</p>}
+                    </div>
 
-                    {/* Botones */}
                     <footer className="mt-4 flex justify-end gap-3">
                         <button
                             type="button"
