@@ -24,7 +24,6 @@ export const GenerateQuizModal = ({ isOpen, onClose, onSuccess, group }: Generat
 
     useEffect(() => {
         setValue("group", group);
-        console.log("group", group);
     }, [group])
 
     const [quantity, setQuantity] = useState(5); // Estado para el contador
