@@ -6,6 +6,7 @@ import type { Group } from "../../interfaces/Group"
 import type { Quiz } from "../../interfaces/Quizzes"
 import { Chat } from "./tabsViewGroup/tabChat"
 import { GenerateQuizModal } from "./GenerateQuizModal"
+import { getSessions } from "../../services/sessionService"
 
 const TABS = [
   { key: "chat", label: "Chat grupal" },
@@ -23,12 +24,26 @@ export const ViewGroup = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   useEffect(() => {
+    async function fetSessions(id: any) {
+      try {
+        const response = await getSessions(id)
+        setQuizzes(response)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+    fetSessions(id)
+
+
+
+  }, [id])
+
+
+  useEffect(() => {
     async function fetchGroup(id: string) {
       try {
         const responseGroup = await GetGroup(id);
         setGroup(responseGroup)
-
-        console.log(responseGroup)
       } catch (error) {
         console.error(error)
       }
@@ -36,15 +51,7 @@ export const ViewGroup = () => {
     }
     fetchGroup(id || "")
   }, [id])
-  useEffect(() => (
-    setQuizzes([{
-      id: 1,
-      title: "Quiz 1: Introducción",
-      description: "Breve explicación del quiz.",
 
-    }])
-
-  ), [id])
   setTimeout(() => {
     setLoading(false)
   }, 2000);
