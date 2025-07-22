@@ -15,6 +15,7 @@ const TABS = [
   { key: "resultados", label: "Resultados" },
   { key: "progreso", label: "Progreso Individual" },
 ]
+
 export const ViewGroup = () => {
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState("quizzes")
@@ -23,11 +24,32 @@ export const ViewGroup = () => {
   const [quizzes, setQuizzes] = useState<Partial<Quiz[]>>([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
+  // se obtiene la informacion del grupo para ser mostrada en pantalla.
+  useEffect(() => {
+    async function fetchGroup(id: string) {
+      try {
+        const responseGroup = await GetGroup(id);
+        setLoading(false)
+        setGroup(responseGroup)
+      } catch (error) {
+        console.error(error)
+        setLoading(false)
+
+      }
+
+    }
+    fetchGroup(id || "")
+  }, [id])
+
+
+  // se ejecuta al entrar a la vista para CARGAR TODAS LAS SESSIONES DE QUIZZES. 
   useEffect(() => {
     async function fetSessions(id: any) {
       try {
         const response = await getSessions(id)
+        response.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         setQuizzes(response)
+        console.log(response)
       } catch (error) {
         console.error(error)
       }
@@ -37,24 +59,6 @@ export const ViewGroup = () => {
 
 
   }, [id])
-
-
-  useEffect(() => {
-    async function fetchGroup(id: string) {
-      try {
-        const responseGroup = await GetGroup(id);
-        setGroup(responseGroup)
-      } catch (error) {
-        console.error(error)
-      }
-
-    }
-    fetchGroup(id || "")
-  }, [id])
-
-  setTimeout(() => {
-    setLoading(false)
-  }, 2000);
 
   const SkeletonCard = () => {
     return (
@@ -73,7 +77,7 @@ export const ViewGroup = () => {
   return (
     <div className="bg-gray-100 dark:bg-gray-700 min-h-screen">
       <AsideMenu />
-      <GenerateQuizModal isOpen={modalIsOpen} onClose={() => setModalIsOpen(false)} onSuccess={() => { }} group={group as Group} />
+      <GenerateQuizModal isOpen={modalIsOpen} onClose={() => setModalIsOpen(false)} onSuccess={() => { window.location.reload() }} groupId={group?.id} />
 
 
       <main className="ease-soft-in-out lg:ml-68.5 relative min-h-screen rounded-xl transition-all duration-200 pt-8">
@@ -113,10 +117,14 @@ export const ViewGroup = () => {
               <div className="w-full h-10 sm:w-50 rounded-lg bg-gray-500 animate-pulse"></div>
             </> :
               <>
+
                 <button className="w-full h-10 sm:w-50 bg-blue-600 hover:bg-blue-700  text-white rounded-lg font-semibold shadow transition-colors text-sm flex justify-center items-center gap-2 cursor-pointer" title="Descargar material de estudio">
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" /></svg>
                   Descargar material
-                </button></>}
+                </button>
+
+
+              </>}
 
           </div>
           {/* Tabs */}
@@ -161,13 +169,20 @@ export const ViewGroup = () => {
                 
                 ">
                   {loading && Array.from({ length: 3 }).map((_, id) => <SkeletonCard key={id} />)}
-                  {quizzes && quizzes.map((quiz) => (
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col gap-2 min-w-[250px] sm:min-w-[350px]">
+                  {!loading && quizzes && quizzes.map((quiz) => (
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col justify-between gap-2 min-w-[250px] sm:min-w-[350px] max-w-1/3">
                       <h4 className="font-semibold dark:text-white ">{quiz?.title}</h4>
                       <p className="text-sm text-gray-600 dark:text-white">{quiz?.description}</p>
                       <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
                         <span className="font-semibold">{quiz?.quatityQuestion || 0} preguntas</span>
                         <span className="font-semibold">Duración: {quiz?.duration || 0} min</span>
+
+                      </div>
+                      <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
+
+                        <p>
+                          Creado a las <span className="font-bold">{quiz?.createdAt?.toString().slice(11, 19)}</span> el <span className="font-bold">{quiz?.createdAt?.toString().slice(0, 10)}</span>
+                        </p>
                       </div>
                       <button className="px-3 py-1 text-white rounded text-sm w-fit flex gap-1 items-center cursor-pointer  bg-blue-600 hover:bg-blue-700  ">
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -176,6 +191,9 @@ export const ViewGroup = () => {
                         Iniciar Quiz
                       </button>
                     </div>
+
+
+
                   ))}
 
 
