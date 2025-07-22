@@ -5,7 +5,7 @@ export interface ParamsNewSession {
     quantity: number;
     title: string;
     typeOptions: string[]; /* seleccion multiple, verdadero y falso, seleccion unica, respuestas corta  */
-    group?: Partial<Group>;
+    studyGroupId?: number;
 }
 
 export interface Session {
