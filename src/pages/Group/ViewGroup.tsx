@@ -23,6 +23,7 @@ export const ViewGroup = () => {
   const [group, setGroup] = useState<Partial<Group>>();
   const [quizzes, setQuizzes] = useState<Partial<Quiz[]>>([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [document, setDocument] = useState<Partial<Document>>()
 
   // se obtiene la informacion del grupo para ser mostrada en pantalla.
   useEffect(() => {
@@ -59,6 +60,11 @@ export const ViewGroup = () => {
 
 
   }, [id])
+
+  useEffect(() => {
+
+  }, [])
+
 
   const SkeletonCard = () => {
     return (
@@ -117,11 +123,44 @@ export const ViewGroup = () => {
               <div className="w-full h-10 sm:w-50 rounded-lg bg-gray-500 animate-pulse"></div>
             </> :
               <>
+                {!document ? <>
 
-                <button className="w-full h-10 sm:w-50 bg-blue-600 hover:bg-blue-700  text-white rounded-lg font-semibold shadow transition-colors text-sm flex justify-center items-center gap-2 cursor-pointer" title="Descargar material de estudio">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" /></svg>
-                  Descargar material
-                </button>
+                  <label
+                    htmlFor="File"
+                    className="block rounded border border-gray-300 bg-white p-4 text-gray-900 shadow-sm sm:p-3 sm:px-6 dark:border-gray-600 dark:bg-gray-700 dark:text-white cursor-pointer"
+                  >
+                    <div className="flex items-center justify-center gap-4">
+                      <p className=" font-semibold dark:text-white">
+                        Sube tu documento <br />
+                        <span className="text-sm font-light ">(pdf, word, txt)</span>
+                      </p>
+
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                        className="size-6"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m0-3-3-3m0 0-3 3m3-3v11.25m6-2.25h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75"
+                        />
+                      </svg>
+                    </div>
+
+                    <input type="file" id="File" className="sr-only" />
+                  </label>
+                </> : <>
+
+                  <button className="w-full h-10 sm:w-50 bg-blue-600 hover:bg-blue-700  text-white rounded-lg font-semibold shadow transition-colors text-sm flex justify-center items-center gap-2 cursor-pointer" title="Descargar material de estudio">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" /></svg>
+                    Descargar material
+                  </button>
+                </>}
+
 
 
               </>}
