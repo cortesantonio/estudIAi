@@ -12,11 +12,11 @@
 import type{ Group} from "./Group";
 
 export interface Document{
-    id: number;
+    id?: number;
     studyGroupId: number
     title: string;
     fileUrl: string;
     extractedText: string;
     uploadedAt: Date;
-    studyGroup: Group;
+    studyGroup?: Group;
 }

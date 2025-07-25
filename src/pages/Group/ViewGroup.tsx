@@ -7,6 +7,13 @@ import type { Quiz } from "../../interfaces/Quizzes"
 import { Chat } from "./tabsViewGroup/tabChat"
 import { GenerateQuizModal } from "./GenerateQuizModal"
 import { getSessions } from "../../services/sessionService"
+import { getFlashcards } from "../../services/flashcardsService"
+import type { flashcards } from "../../interfaces/Flashcards"
+import { GenerateFlashcards } from "./GenerateFlashcards"
+import { supabase } from "../../services/supabaseService"
+import type { Document } from "../../interfaces/Document"
+import { getDocument, registerDocument } from "../../services/documentService"
+
 
 const TABS = [
   { key: "chat", label: "Chat grupal" },
@@ -18,31 +25,51 @@ const TABS = [
 
 export const ViewGroup = () => {
   const [loading, setLoading] = useState(true)
+  const [loadingFlashcards, setLoadingFlashcards] = useState(true)
   const [tab, setTab] = useState("quizzes")
   const { id } = useParams();
+
   const [group, setGroup] = useState<Partial<Group>>();
+  const [documento, setDocumento] = useState<Document>()
   const [quizzes, setQuizzes] = useState<Partial<Quiz[]>>([]);
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [document, setDocument] = useState<Partial<Document>>()
+  const [flashcards, setFlashcards] = useState<flashcards[]>();
+  const [modalGenQuizzesisOpen, setModalGenQuizzesisOpen] = useState(false);
+  const [modalGenFlashcardisOpen, setModalGenFlashcardisOpen] = useState(false);
+
+  const [file, setFile] = useState<File | null>(null);
+  const [showFlashcards, setShowFlashcards] = useState<number[]>([])
+
+  const handleShowFlashcards = (idFlashcard: number) => {
+    if (!showFlashcards.includes(idFlashcard)) {
+      setShowFlashcards([...showFlashcards, idFlashcard])
+    } else {
+      setShowFlashcards(showFlashcards.filter(id => id !== idFlashcard))
+    }
+
+  }
 
   // se obtiene la informacion del grupo para ser mostrada en pantalla.
   useEffect(() => {
     async function fetchGroup(id: string) {
       try {
         const responseGroup = await GetGroup(id);
-        setLoading(false)
-        setGroup(responseGroup)
-      } catch (error) {
-        console.error(error)
+        const respondeDocument = await getDocument(responseGroup.id);
         setLoading(false)
 
+        setGroup(responseGroup)
+        setDocumento(respondeDocument)
+
+    
+
+      } catch (error) {
+        setLoading(false)
+
+        console.error(error)
       }
 
     }
     fetchGroup(id || "")
   }, [id])
-
-
   // se ejecuta al entrar a la vista para CARGAR TODAS LAS SESSIONES DE QUIZZES. 
   useEffect(() => {
     async function fetSessions(id: any) {
@@ -50,7 +77,6 @@ export const ViewGroup = () => {
         const response = await getSessions(id)
         response.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         setQuizzes(response)
-        console.log(response)
       } catch (error) {
         console.error(error)
       }
@@ -60,10 +86,56 @@ export const ViewGroup = () => {
 
 
   }, [id])
-
   useEffect(() => {
+    async function fetchFlashcards(id: any) {
+      try {
+        const response = await getFlashcards(id)
+        setFlashcards(response)
+        setLoadingFlashcards(false)
+      } catch (error) {
+        console.error(error)
+        setLoadingFlashcards(false)
+      }
+    }
+    fetchFlashcards(id)
 
-  }, [])
+  }, [id])
+
+
+  const handleUpload = async () => {
+    if (!file) return;
+
+    const filePath = `${Date.now()}_${file.name}`;
+
+    const { data, error } = await supabase.storage
+      .from('documentos')
+      .upload(filePath, file);
+
+    if (error) {
+      console.error('Error al subir archivo:', error);
+      return;
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from('documentos')
+      .getPublicUrl(filePath);
+
+    const publicUrl = publicUrlData?.publicUrl;
+
+    // Ahora guarda en la base de datos a través de tu API
+
+    const newDoc: Document = {
+      title: file.name,
+      fileUrl: publicUrl,
+      extractedText: "",
+      uploadedAt: new Date(),
+      studyGroupId: group?.id || 0
+    }
+
+    await registerDocument(newDoc)
+
+    alert('Archivo subido y registrado');
+  };
 
 
   const SkeletonCard = () => {
@@ -80,11 +152,23 @@ export const ViewGroup = () => {
     )
   }
 
+  const SkeletonCardFlashcards = () => {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-2 py-6 flex flex-col justify-between items-center gap-2 min-w-[200px] sm:min-w-[300px]  max-w-sm min-h-40">
+        <div className=" flex flex-col   w-full gap-2">
+          <div className="h-6 w-full bg-gray-700 rounded-lg animate-pulse"></div>
+          <div className="h-6 w-3/4 mx-auto bg-gray-700 rounded-lg animate-pulse"></div>
+        </div>
+        <div className="h-7 w-2/5 bg-gray-700 rounded-lg animate-pulse"></div>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-gray-100 dark:bg-gray-700 min-h-screen">
       <AsideMenu />
-      <GenerateQuizModal isOpen={modalIsOpen} onClose={() => setModalIsOpen(false)} onSuccess={() => { window.location.reload() }} groupId={group?.id} />
-
+      <GenerateQuizModal isOpen={modalGenQuizzesisOpen} onClose={() => setModalGenQuizzesisOpen(false)} onSuccess={() => { window.location.reload() }} groupId={group?.id} />
+      <GenerateFlashcards isOpen={modalGenFlashcardisOpen} onClose={() => setModalGenFlashcardisOpen(false)} onSuccess={() => { window.location.reload() }} groupId={group?.id || 0} />
 
       <main className="ease-soft-in-out lg:ml-68.5 relative min-h-screen rounded-xl transition-all duration-200 pt-8">
         {/* Header mejorado con botón de material */}
@@ -119,51 +203,100 @@ export const ViewGroup = () => {
               </div>
             </div>
 
-            {!group ? <>
+            {!group && <>
               <div className="w-full h-10 sm:w-50 rounded-lg bg-gray-500 animate-pulse"></div>
-            </> :
+            </>}
+
+            {documento?.fileUrl &&
               <>
-                {!document ? <>
+                <button onClick={() => window.open(documento.fileUrl, '_blank')} className="w-full h-10 sm:w-50 bg-blue-600 hover:bg-blue-700  text-white rounded-lg font-semibold shadow transition-colors text-sm flex justify-center items-center gap-2 cursor-pointer" title="Descargar material de estudio">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" /></svg>
+                  Descargar material
+                </button>
+              </>
+            }
 
-                  <label
-                    htmlFor="File"
-                    className="block rounded border border-gray-300 bg-white p-4 text-gray-900 shadow-sm sm:p-3 sm:px-6 dark:border-gray-600 dark:bg-gray-700 dark:text-white cursor-pointer"
-                  >
-                    <div className="flex items-center justify-center gap-4">
-                      <p className=" font-semibold dark:text-white">
-                        Sube tu documento <br />
-                        <span className="text-sm font-light ">(pdf, word, txt)</span>
-                      </p>
+            {!documento?.fileUrl && !loading && (
+              <>
+                <label
+                  htmlFor="File"
+                  className="block rounded border border-gray-300 bg-white p-4 text-gray-900 shadow-sm sm:p-3 sm:px-6 dark:border-gray-600 dark:bg-gray-700 dark:text-white cursor-pointer"
+                >
+                  {!file ? (
+                    <>
+                      <div className="flex items-center justify-center gap-4">
+                        <p className=" font-semibold dark:text-white">
+                          Sube tu documento <br />
+                          <span className="text-sm font-light ">(Solo pdf)</span>
+                        </p>
 
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                        className="size-6"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m0-3-3-3m0 0-3 3m3-3v11.25m6-2.25h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75"
-                        />
-                      </svg>
-                    </div>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth="1.5"
+                          stroke="currentColor"
+                          className="size-6"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m0-3-3-3m0 0-3 3m3-3v11.25m6-2.25h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75"
+                          />
+                        </svg>
+                      </div>
 
-                    <input type="file" id="File" className="sr-only" />
-                  </label>
-                </> : <>
+                      <input
+                        type="file"
+                        id="File"
+                        className="sr-only"
+                        onChange={(e) => setFile(e.target.files?.[0] || null)}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex  items-center justify-center gap-4">
+                        <p className="font-semibold dark:text-white text-left">
+                          <span className="font-light"> Subirás: </span> <br />
+                          {file.name}
+                        </p>
 
-                  <button className="w-full h-10 sm:w-50 bg-blue-600 hover:bg-blue-700  text-white rounded-lg font-semibold shadow transition-colors text-sm flex justify-center items-center gap-2 cursor-pointer" title="Descargar material de estudio">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" /></svg>
-                    Descargar material
-                  </button>
-                </>}
+                        <div className="flex gap-4">
+                          <button
+                            type="button"
+                            className="px-4 py-2 rounded bg-gray-400 text-white hover:bg-gray-500 flex items-center gap-1"
+                            onClick={() => setFile(null)}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#FFFFFF"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" /></svg>
 
+                            Cancelar
+                          </button>
+                          <button
+                            type="button"
+                            className="px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600 flex items-center gap-1"
+                            onClick={handleUpload} // función que debes definir para enviar el archivo
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#FFFFFF">
+                              <path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z" />
+                            </svg>
+                            Enviar
 
+                          </button>
+                        </div>
+                      </div>
 
-              </>}
+                      <input
+                        type="file"
+                        id="File"
+                        className="sr-only"
+                        onChange={(e) => setFile(e.target.files?.[0] || null)}
+                      />
+                    </>
+                  )}
+                </label>
+              </>
+            )}
+
 
           </div>
           {/* Tabs */}
@@ -191,25 +324,16 @@ export const ViewGroup = () => {
                 <div className="mb-4 flex gap-4 items-center justify-between lg:justify-start ">
                   <h3 className="font-bold text-xl dark:text-white">Quizzes Disponibles</h3>
                   <button className="px-3 py-2 sm:w-50 bg-blue-600 hover:bg-blue-700  text-white rounded-lg font-semibold shadow transition-colors text-sm flex justify-center items-center gap-2 cursor-pointer"
-                    title="Generar quizzes con ia" onClick={() => setModalIsOpen(!modalIsOpen)}>
+                    title="Generar quizzes con ia" onClick={() => setModalGenQuizzesisOpen(!modalGenQuizzesisOpen)}>
                     <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#fff"><path d="M331-651 211-771l57-57 120 120-57 57Zm149-95v-170h80v170h-80Zm291 535L651-331l57-57 120 120-57 57Zm-63-440-57-57 120-120 57 57-120 120Zm38 171v-80h170v80H746ZM205-92 92-205q-12-12-12-28t12-28l363-364q35-35 85-35t85 35q35 35 35 85t-35 85L261-92q-12 12-28 12t-28-12Zm279-335-14.5-14-14.5-14-14-14-14-14 28 28 29 28ZM233-176l251-251-57-56-250 250 56 57Z" /></svg>
                     Generar con IA
                   </button>
                 </div>
 
-                <div className="flex gap-4 overflow-auto pb-2
-                [&::-webkit-scrollbar]:w-2
-                [&::-webkit-scrollbar-track]:rounded-lg
-              [&::-webkit-scrollbar-track]:bg-gray-100
-                [&::-webkit-scrollbar-thumb]:rounded-lg
-              [&::-webkit-scrollbar-thumb]:bg-gray-300
-              dark:[&::-webkit-scrollbar-track]:bg-gray-600
-                dark:[&::-webkit-scrollbar-thumb]:bg-gray-800 
-                
-                ">
+                <div className="flex gap-4 overflow-auto pb-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-lg [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-lg [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-600  dark:[&::-webkit-scrollbar-thumb]:bg-gray-800 ">
                   {loading && Array.from({ length: 3 }).map((_, id) => <SkeletonCard key={id} />)}
                   {!loading && quizzes && quizzes.map((quiz) => (
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col justify-between gap-2 min-w-[250px] sm:min-w-[350px] max-w-1/3">
+                    <div key={quiz?.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col justify-between gap-2 min-w-[250px] sm:min-w-[350px] max-w-1/3">
                       <h4 className="font-semibold dark:text-white ">{quiz?.title}</h4>
                       <p className="text-sm text-gray-600 dark:text-white">{quiz?.description}</p>
                       <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
@@ -220,7 +344,7 @@ export const ViewGroup = () => {
                       <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
 
                         <p>
-                          Creado a las <span className="font-bold">{quiz?.createdAt?.toString().slice(11, 19)}</span> el <span className="font-bold">{quiz?.createdAt?.toString().slice(0, 10)}</span>
+                          Creado a las <span className="font-bold">{quiz?.createdAt?.toString().slice(11, 19)}</span>hrs. El <span className="font-bold">{quiz?.createdAt?.toString().slice(0, 10)}</span>
                         </p>
                       </div>
                       <button className="px-3 py-1 text-white rounded text-sm w-fit flex gap-1 items-center cursor-pointer  bg-blue-600 hover:bg-blue-700  ">
@@ -235,29 +359,52 @@ export const ViewGroup = () => {
 
                   ))}
 
+                  {!loading && quizzes?.length === 0 && (
+                    <div onClick={() => setModalGenQuizzesisOpen(true)} className="bg-white dark:bg-gray-800 rounded-lg shadow p-2 py-6 flex flex-col justify-between items-center gap-2 min-w-[200px] sm:min-w-[300px]  max-w-sm min-h-40 cursor-pointer hover:bg-gray-200 duration-200 transition-all">
+                      <svg xmlns="http://www.w3.org/2000/svg" height="64px" viewBox="0 -960 960 960" width="64px" className="dark:fill-white fill-gray-800   ">
+                        <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" /></svg>
+                      <p className="text-center dark:text-white">
+                        ¡Ups! Aún no hay quizzes disponibles. <br />
+                        <span className="font-semibold">¡Crea uno ahora!</span>
+                      </p>
+                    </div>
+
+                  )}
+
 
                 </div>
               </div>
 
               {/* Flashcards / Modo Práctica */}
               <div>
-                <h3 className="font-bold mb-2 text-xl dark:text-white">Flashcards</h3>
-                <div className="flex gap-4 overflow-y-auto pb-2
-                [&::-webkit-scrollbar]:w-2
-                [&::-webkit-scrollbar-track]:rounded-lg
-              [&::-webkit-scrollbar-track]:bg-gray-100
-                [&::-webkit-scrollbar-thumb]:rounded-lg
-              [&::-webkit-scrollbar-thumb]:bg-gray-300
-              dark:[&::-webkit-scrollbar-track]:bg-gray-600
-                dark:[&::-webkit-scrollbar-thumb]:bg-gray-800 
-                ">
-                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-2 py-6 flex flex-col justify-center items-center gap-2 min-w-[200px] sm:min-w-[300px]  max-w-sm">
-                    <div className="font-semibold mb-2 dark:text-white text-wrap text-center">Lorem ipsum dolor sit amet
-                      consectetur adipisicing elit. Tenetur, voluptatum.</div>
-                    <button className="px-3 py-1  bg-blue-600 hover:bg-blue-700  text-white rounded text-sm cursor-pointer">Ver Respuesta</button>
-                  </div>
+                <h3 className="font-bold mb-2 text-xl dark:text-white">Flashcards ({flashcards?.length || 0})</h3>
+                <div className="flex gap-4 overflow-auto pb-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-lg [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-lg [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-600  dark:[&::-webkit-scrollbar-thumb]:bg-gray-800 ">
 
+                  {flashcards && flashcards.map((flashcard) => (
+                    <div key={flashcard?.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-2 py-6 flex flex-col justify-between items-center gap-2 min-w-[200px] sm:min-w-[300px]  max-w-sm min-h-40">
+                      {
+                        showFlashcards.includes(flashcard.id) ?
+                          <>
+                            <div className="font-semibold mb-2 dark:text-white text-wrap text-center">{flashcard?.answer}</div>
+                            <button className="px-3 py-1  bg-blue-600 hover:bg-blue-700  text-white rounded text-sm cursor-pointer" onClick={() => { handleShowFlashcards(flashcard.id) }}>Ver Pregunta</button>
+                          </>
+                          :
+                          <>
+                            <div className="font-semibold mb-2 dark:text-white text-wrap text-center">{flashcard?.question}</div>
+                            <button className="px-3 py-1  bg-blue-600 hover:bg-blue-700  text-white rounded text-sm cursor-pointer" onClick={() => { handleShowFlashcards(flashcard.id) }}>Ver Respuesta</button>
+                          </>
+                      }
+                    </div>))
+                  }
 
+                  {loadingFlashcards && Array.from({ length: 3 }).map((_, id) => (<SkeletonCardFlashcards key={id} />))}
+
+                  {!loadingFlashcards && flashcards?.length === 0 && (
+                    <div onClick={() => setModalGenFlashcardisOpen(!modalGenFlashcardisOpen)} className="bg-white dark:bg-gray-800 rounded-lg shadow p-2 py-6 flex flex-col justify-between items-center gap-2 min-w-[200px] sm:min-w-[300px]  max-w-sm min-h-40 cursor-pointer hover:bg-gray-200 duration-200 transition-all">
+                      <svg xmlns="http://www.w3.org/2000/svg" height="64px" viewBox="0 -960 960 960" width="64px" className="dark:fill-white fill-gray-800   ">
+                        <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" /></svg>
+                      <p className="text-center dark:text-white">¡Ups! Aún no hay flashcards. <br /> <span className="font-semibold">¡Créalas ahora!</span> </p>
+                    </div>)}
                 </div>
               </div>
               {/* Historial de Quizzes */}
@@ -446,7 +593,7 @@ export const ViewGroup = () => {
             </section>
           )}
         </div>
-      </main>
-    </div>
+      </main >
+    </div >
   )
 }
