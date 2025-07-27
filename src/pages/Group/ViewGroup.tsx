@@ -13,7 +13,7 @@ import { GenerateFlashcards } from "./GenerateFlashcards"
 import { supabase } from "../../services/supabaseService"
 import type { Document } from "../../interfaces/Document"
 import { getDocument, registerDocument } from "../../services/documentService"
-
+import { ClipLoader } from "react-spinners"
 
 const TABS = [
   { key: "chat", label: "Chat grupal" },
@@ -35,7 +35,7 @@ export const ViewGroup = () => {
   const [flashcards, setFlashcards] = useState<flashcards[]>();
   const [modalGenQuizzesisOpen, setModalGenQuizzesisOpen] = useState(false);
   const [modalGenFlashcardisOpen, setModalGenFlashcardisOpen] = useState(false);
-
+  const [uploadLoading, setUploadLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [showFlashcards, setShowFlashcards] = useState<number[]>([])
 
@@ -59,7 +59,7 @@ export const ViewGroup = () => {
         setGroup(responseGroup)
         setDocumento(respondeDocument)
 
-    
+
 
       } catch (error) {
         setLoading(false)
@@ -103,38 +103,87 @@ export const ViewGroup = () => {
 
 
   const handleUpload = async () => {
-    if (!file) return;
-
-    const filePath = `${Date.now()}_${file.name}`;
-
-    const { data, error } = await supabase.storage
-      .from('documentos')
-      .upload(filePath, file);
-
-    if (error) {
-      console.error('Error al subir archivo:', error);
+    if (!file) {
+      console.warn('No se ha seleccionado ningún archivo');
       return;
     }
 
-    const { data: publicUrlData } = supabase.storage
-      .from('documentos')
-      .getPublicUrl(filePath);
-
-    const publicUrl = publicUrlData?.publicUrl;
-
-    // Ahora guarda en la base de datos a través de tu API
-
-    const newDoc: Document = {
-      title: file.name,
-      fileUrl: publicUrl,
-      extractedText: "",
-      uploadedAt: new Date(),
-      studyGroupId: group?.id || 0
+    // Validar tipo de archivo
+    if (!file.type.includes('pdf')) {
+      alert('Solo se permiten archivos PDF');
+      return;
     }
 
-    await registerDocument(newDoc)
+    // Validar tamaño del archivo (máximo 10MB)
+    const maxSize = 40 * 1024 * 1024; // 10MB en bytes
+    if (file.size > maxSize) {
+      alert('El archivo es demasiado grande. Máximo 10MB permitido.');
+      return;
+    }
 
-    alert('Archivo subido y registrado');
+    if (!group?.id) {
+      alert('Error: No se pudo identificar el grupo');
+      return;
+    }
+
+    setUploadLoading(true);
+
+    try {
+      // Generar nombre único para el archivo
+      const timestamp = Date.now();
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const filePath = `${group.id}/${timestamp}_${sanitizedName}`;
+
+      // Subir archivo a Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('documentos')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        throw new Error(`Error al subir archivo: ${uploadError.message}`);
+      }
+
+      // Obtener URL pública del archivo
+      const { data: publicUrlData } = supabase.storage
+        .from('documentos')
+        .getPublicUrl(filePath);
+
+      if (!publicUrlData?.publicUrl) {
+        throw new Error('No se pudo obtener la URL pública del archivo');
+      }
+
+      // Crear objeto del documento
+      const newDoc: Document = {
+        title: file.name,
+        fileUrl: publicUrlData.publicUrl,
+        extractedText: "",
+        uploadedAt: new Date(),
+        studyGroupId: group.id
+      };
+
+      // Registrar documento en la base de datos
+      await registerDocument(newDoc);
+
+      // Limpiar estado y mostrar éxito
+      setFile(null);
+      alert('Documento subido exitosamente');
+
+      // Recargar la página para mostrar el nuevo documento
+      window.location.reload();
+
+    } catch (error) {
+      console.error('Error en handleUpload:', error);
+
+      // Mostrar mensaje de error específico al usuario
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido al subir el archivo';
+      alert(`Error: ${errorMessage}`);
+
+    } finally {
+      setUploadLoading(false);
+    }
   };
 
 
@@ -216,14 +265,16 @@ export const ViewGroup = () => {
               </>
             }
 
-            {!documento?.fileUrl && !loading && (
+            {!documento?.fileUrl && !loading &&
               <>
-                <label
-                  htmlFor="File"
-                  className="block rounded border border-gray-300 bg-white p-4 text-gray-900 shadow-sm sm:p-3 sm:px-6 dark:border-gray-600 dark:bg-gray-700 dark:text-white cursor-pointer"
-                >
-                  {!file ? (
-                    <>
+                {file == null ?
+                  <>
+                    <label
+                      htmlFor="File"
+                      className="block rounded border border-gray-300 bg-white p-4 text-gray-900 shadow-sm sm:p-3 sm:px-6 dark:border-gray-600
+                       dark:bg-gray-700 dark:text-white cursor-pointer "
+                    >
+
                       <div className="flex items-center justify-center gap-4">
                         <p className=" font-semibold dark:text-white">
                           Sube tu documento <br />
@@ -252,38 +303,8 @@ export const ViewGroup = () => {
                         className="sr-only"
                         onChange={(e) => setFile(e.target.files?.[0] || null)}
                       />
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex  items-center justify-center gap-4">
-                        <p className="font-semibold dark:text-white text-left">
-                          <span className="font-light"> Subirás: </span> <br />
-                          {file.name}
-                        </p>
 
-                        <div className="flex gap-4">
-                          <button
-                            type="button"
-                            className="px-4 py-2 rounded bg-gray-400 text-white hover:bg-gray-500 flex items-center gap-1"
-                            onClick={() => setFile(null)}
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#FFFFFF"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" /></svg>
 
-                            Cancelar
-                          </button>
-                          <button
-                            type="button"
-                            className="px-4 py-2 rounded bg-green-500 text-white hover:bg-green-600 flex items-center gap-1"
-                            onClick={handleUpload} // función que debes definir para enviar el archivo
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#FFFFFF">
-                              <path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z" />
-                            </svg>
-                            Enviar
-
-                          </button>
-                        </div>
-                      </div>
 
                       <input
                         type="file"
@@ -291,16 +312,46 @@ export const ViewGroup = () => {
                         className="sr-only"
                         onChange={(e) => setFile(e.target.files?.[0] || null)}
                       />
-                    </>
-                  )}
-                </label>
+                    </label>
+                  </>
+                  : <div className=" h-20 flex items-center justify-between gap-4 ">
+                    {!uploadLoading ?
+                      <>
+                        <ClipLoader color="#0ea5e9" />
+                        <p className="dark:text-white">Subiendo archivo, espere un momento.</p>
+
+                      </>
+
+                      : <>
+                        <p className="font-light text-sm leading-none">
+                          Estas seguro(a) de subir este archivo:
+                          <br />
+                          <span className="font-semibold text-lg">{file.name}</span>
+                        </p>
+                        <div className="flex gap-1">
+                          <button className="px-1 py-2 rounded-lg bg-gray-400 hover:bg-gray-500  flex items-center justify-center cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" /></svg>
+                          </button>
+                          <button className="px-1 py-2 sm:w-50 bg-green-600 hover:bg-green-700  text-white rounded-lg font-semibold shadow transition-colors text-sm flex justify-center items-center gap-2 cursor-pointer" >
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF"><path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z" /></svg>
+                            Confirmar envio
+                          </button>
+                        </div>
+                      </>}
+
+
+
+                  </div>}
               </>
-            )}
+            }
 
 
           </div>
           {/* Tabs */}
-          <div className="flex gap-2 border-b border-gray-300 dark:border-gray-600 mb-6 overflow-auto">
+          <div
+            inert={!!documento}
+            style={!!documento ? { opacity: 0.5, pointerEvents: 'none' } : {}}
+            className="flex gap-2 border-b border-gray-300 dark:border-gray-600 mb-6 overflow-auto">
             {TABS.map(t => (
               <button
                 key={t.key}
@@ -313,7 +364,10 @@ export const ViewGroup = () => {
           </div>
         </div>
         {/* Contenido de cada tab */}
-        <div className="w-full px-6 mx-auto pb-12">
+        <div
+          inert={!!documento}
+          style={!!documento ? { opacity: 0.5, pointerEvents: 'none' } : {}}
+          className="w-full px-6 mx-auto pb-12 ">
 
           <Chat isOpen={tab === "chat"} group={group as Group} />
 
