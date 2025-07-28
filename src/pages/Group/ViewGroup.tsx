@@ -3,18 +3,14 @@ import { AsideMenu } from "../../components/asideMenu"
 import { useParams } from "react-router-dom"
 import { GetGroup } from "../../services/groupService"
 import type { Group } from "../../interfaces/Group"
-import type { Quiz } from "../../interfaces/Quizzes"
 import { Chat } from "./tabsViewGroup/tabChat"
 import { GenerateQuizModal } from "./GenerateQuizModal"
-import { getSessions } from "../../services/sessionService"
-import { getFlashcards } from "../../services/flashcardsService"
-import type { flashcards } from "../../interfaces/Flashcards"
 import { GenerateFlashcards } from "./GenerateFlashcards"
 import { supabase } from "../../services/supabaseService"
 import type { Document } from "../../interfaces/Document"
 import { getDocument, registerDocument } from "../../services/documentService"
 import { ClipLoader } from "react-spinners"
-
+import Quizzes from "./tabsViewGroup/tabQuizzes"
 const TABS = [
   { key: "chat", label: "Chat grupal" },
   { key: "quizzes", label: "Quizzes" },
@@ -25,28 +21,17 @@ const TABS = [
 
 export const ViewGroup = () => {
   const [loading, setLoading] = useState(true)
-  const [loadingFlashcards, setLoadingFlashcards] = useState(true)
   const [tab, setTab] = useState("quizzes")
   const { id } = useParams();
 
   const [group, setGroup] = useState<Partial<Group>>();
   const [documento, setDocumento] = useState<Document>()
-  const [quizzes, setQuizzes] = useState<Partial<Quiz[]>>([]);
-  const [flashcards, setFlashcards] = useState<flashcards[]>();
   const [modalGenQuizzesisOpen, setModalGenQuizzesisOpen] = useState(false);
   const [modalGenFlashcardisOpen, setModalGenFlashcardisOpen] = useState(false);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [showFlashcards, setShowFlashcards] = useState<number[]>([])
 
-  const handleShowFlashcards = (idFlashcard: number) => {
-    if (!showFlashcards.includes(idFlashcard)) {
-      setShowFlashcards([...showFlashcards, idFlashcard])
-    } else {
-      setShowFlashcards(showFlashcards.filter(id => id !== idFlashcard))
-    }
 
-  }
 
   // se obtiene la informacion del grupo para ser mostrada en pantalla.
   useEffect(() => {
@@ -59,8 +44,6 @@ export const ViewGroup = () => {
         setGroup(responseGroup)
         setDocumento(respondeDocument)
 
-
-
       } catch (error) {
         setLoading(false)
 
@@ -69,36 +52,6 @@ export const ViewGroup = () => {
 
     }
     fetchGroup(id || "")
-  }, [id])
-  // se ejecuta al entrar a la vista para CARGAR TODAS LAS SESSIONES DE QUIZZES. 
-  useEffect(() => {
-    async function fetSessions(id: any) {
-      try {
-        const response = await getSessions(id)
-        response.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        setQuizzes(response)
-      } catch (error) {
-        console.error(error)
-      }
-    }
-    fetSessions(id)
-
-
-
-  }, [id])
-  useEffect(() => {
-    async function fetchFlashcards(id: any) {
-      try {
-        const response = await getFlashcards(id)
-        setFlashcards(response)
-        setLoadingFlashcards(false)
-      } catch (error) {
-        console.error(error)
-        setLoadingFlashcards(false)
-      }
-    }
-    fetchFlashcards(id)
-
   }, [id])
 
 
@@ -187,31 +140,7 @@ export const ViewGroup = () => {
   };
 
 
-  const SkeletonCard = () => {
-    return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col gap-2 min-w-[250px] sm:min-w-[350px]">
-        <div className="h-6 w-full bg-gray-500 rounded-lg animate-pulse"></div>
-        <div className="h-5 w-2/3 bg-gray-500 rounded-lg animate-pulse"></div>
-        <div className="h-4 w-1/3 bg-gray-500 rounded-lg animate-pulse"></div>
 
-        <div className="w-30 h-7  bg-blue-600/70 text-white rounded text-sm flex gap-1 items-center justify-center cursor-pointer">
-
-        </div>
-      </div>
-    )
-  }
-
-  const SkeletonCardFlashcards = () => {
-    return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-2 py-6 flex flex-col justify-between items-center gap-2 min-w-[200px] sm:min-w-[300px]  max-w-sm min-h-40">
-        <div className=" flex flex-col   w-full gap-2">
-          <div className="h-6 w-full bg-gray-700 rounded-lg animate-pulse"></div>
-          <div className="h-6 w-3/4 mx-auto bg-gray-700 rounded-lg animate-pulse"></div>
-        </div>
-        <div className="h-7 w-2/5 bg-gray-700 rounded-lg animate-pulse"></div>
-      </div>
-    )
-  }
 
   return (
     <div className="bg-gray-100 dark:bg-gray-700 min-h-screen">
@@ -314,8 +243,8 @@ export const ViewGroup = () => {
                       />
                     </label>
                   </>
-                  : <div className=" h-20 flex items-center justify-between gap-4 ">
-                    {!uploadLoading ?
+                  : <div className=" h-20 flex items-center justify-between gap-5 text-right ">
+                    {uploadLoading ?
                       <>
                         <ClipLoader color="#0ea5e9" />
                         <p className="dark:text-white">Subiendo archivo, espere un momento.</p>
@@ -323,16 +252,20 @@ export const ViewGroup = () => {
                       </>
 
                       : <>
-                        <p className="font-light text-sm leading-none">
+                        <p className="font-light text-sm leading-1 dark:text-white">
                           Estas seguro(a) de subir este archivo:
                           <br />
-                          <span className="font-semibold text-lg">{file.name}</span>
+                          <span className="font-semibold text-base">{file.name}</span>
                         </p>
                         <div className="flex gap-1">
-                          <button className="px-1 py-2 rounded-lg bg-gray-400 hover:bg-gray-500  flex items-center justify-center cursor-pointer">
+                          <button className="px-1 py-2 rounded-lg bg-gray-400 hover:bg-gray-500  dark:bg-gray-600 dark:hover:bg-gray-700 flex items-center justify-center cursor-pointer"
+                            onClick={() => setFile(null)}
+                          >
                             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" /></svg>
                           </button>
-                          <button className="px-1 py-2 sm:w-50 bg-green-600 hover:bg-green-700  text-white rounded-lg font-semibold shadow transition-colors text-sm flex justify-center items-center gap-2 cursor-pointer" >
+                          <button className="px-1 py-2 sm:w-50 bg-green-600 hover:bg-green-700  text-white rounded-lg font-semibold shadow transition-colors text-sm flex justify-center items-center gap-2 cursor-pointer"
+                            onClick={handleUpload}
+                          >
                             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF"><path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z" /></svg>
                             Confirmar envio
                           </button>
@@ -349,8 +282,8 @@ export const ViewGroup = () => {
           </div>
           {/* Tabs */}
           <div
-            inert={!!documento}
-            style={!!documento ? { opacity: 0.5, pointerEvents: 'none' } : {}}
+            inert={!documento}
+            style={!documento ? { opacity: 0.5, pointerEvents: 'none' } : {}}
             className="flex gap-2 border-b border-gray-300 dark:border-gray-600 mb-6 overflow-auto">
             {TABS.map(t => (
               <button
@@ -365,157 +298,13 @@ export const ViewGroup = () => {
         </div>
         {/* Contenido de cada tab */}
         <div
-          inert={!!documento}
-          style={!!documento ? { opacity: 0.5, pointerEvents: 'none' } : {}}
+          inert={documento == null}
+          style={documento == null ? { opacity: 0.5, pointerEvents: 'none' } : {}}
           className="w-full px-6 mx-auto pb-12 ">
 
           <Chat isOpen={tab === "chat"} group={group as Group} />
+          <Quizzes isOpen={tab === "quizzes"} group={group as Group} modalFlashcardsIsOpen={() => setModalGenFlashcardisOpen(!modalGenFlashcardisOpen)} modalQuizzesIsOpen={() => setModalGenQuizzesisOpen(!modalGenQuizzesisOpen)} />
 
-          {tab === "quizzes" && (
-            <section className="flex flex-col gap-8">
-              {/* Quizzes Disponibles */}
-              <div>
-                <div className="mb-4 flex gap-4 items-center justify-between lg:justify-start ">
-                  <h3 className="font-bold text-xl dark:text-white">Quizzes Disponibles</h3>
-                  <button className="px-3 py-2 sm:w-50 bg-blue-600 hover:bg-blue-700  text-white rounded-lg font-semibold shadow transition-colors text-sm flex justify-center items-center gap-2 cursor-pointer"
-                    title="Generar quizzes con ia" onClick={() => setModalGenQuizzesisOpen(!modalGenQuizzesisOpen)}>
-                    <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#fff"><path d="M331-651 211-771l57-57 120 120-57 57Zm149-95v-170h80v170h-80Zm291 535L651-331l57-57 120 120-57 57Zm-63-440-57-57 120-120 57 57-120 120Zm38 171v-80h170v80H746ZM205-92 92-205q-12-12-12-28t12-28l363-364q35-35 85-35t85 35q35 35 35 85t-35 85L261-92q-12 12-28 12t-28-12Zm279-335-14.5-14-14.5-14-14-14-14-14 28 28 29 28ZM233-176l251-251-57-56-250 250 56 57Z" /></svg>
-                    Generar con IA
-                  </button>
-                </div>
-
-                <div className="flex gap-4 overflow-auto pb-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-lg [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-lg [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-600  dark:[&::-webkit-scrollbar-thumb]:bg-gray-800 ">
-                  {loading && Array.from({ length: 3 }).map((_, id) => <SkeletonCard key={id} />)}
-                  {!loading && quizzes && quizzes.map((quiz) => (
-                    <div key={quiz?.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col justify-between gap-2 min-w-[250px] sm:min-w-[350px] max-w-1/3">
-                      <h4 className="font-semibold dark:text-white ">{quiz?.title}</h4>
-                      <p className="text-sm text-gray-600 dark:text-white">{quiz?.description}</p>
-                      <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        <span className="font-semibold">{quiz?.quatityQuestion || 0} preguntas</span>
-                        <span className="font-semibold">Duración: {quiz?.duration || 0} min</span>
-
-                      </div>
-                      <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
-
-                        <p>
-                          Creado a las <span className="font-bold">{quiz?.createdAt?.toString().slice(11, 19)}</span>hrs. El <span className="font-bold">{quiz?.createdAt?.toString().slice(0, 10)}</span>
-                        </p>
-                      </div>
-                      <button className="px-3 py-1 text-white rounded text-sm w-fit flex gap-1 items-center cursor-pointer  bg-blue-600 hover:bg-blue-700  ">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                        Iniciar Quiz
-                      </button>
-                    </div>
-
-
-
-                  ))}
-
-                  {!loading && quizzes?.length === 0 && (
-                    <div onClick={() => setModalGenQuizzesisOpen(true)} className="bg-white dark:bg-gray-800 rounded-lg shadow p-2 py-6 flex flex-col justify-between items-center gap-2 min-w-[200px] sm:min-w-[300px]  max-w-sm min-h-40 cursor-pointer hover:bg-gray-200 duration-200 transition-all">
-                      <svg xmlns="http://www.w3.org/2000/svg" height="64px" viewBox="0 -960 960 960" width="64px" className="dark:fill-white fill-gray-800   ">
-                        <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" /></svg>
-                      <p className="text-center dark:text-white">
-                        ¡Ups! Aún no hay quizzes disponibles. <br />
-                        <span className="font-semibold">¡Crea uno ahora!</span>
-                      </p>
-                    </div>
-
-                  )}
-
-
-                </div>
-              </div>
-
-              {/* Flashcards / Modo Práctica */}
-              <div>
-                <h3 className="font-bold mb-2 text-xl dark:text-white">Flashcards ({flashcards?.length || 0})</h3>
-                <div className="flex gap-4 overflow-auto pb-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-lg [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-lg [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-600  dark:[&::-webkit-scrollbar-thumb]:bg-gray-800 ">
-
-                  {flashcards && flashcards.map((flashcard) => (
-                    <div key={flashcard?.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-2 py-6 flex flex-col justify-between items-center gap-2 min-w-[200px] sm:min-w-[300px]  max-w-sm min-h-40">
-                      {
-                        showFlashcards.includes(flashcard.id) ?
-                          <>
-                            <div className="font-semibold mb-2 dark:text-white text-wrap text-center">{flashcard?.answer}</div>
-                            <button className="px-3 py-1  bg-blue-600 hover:bg-blue-700  text-white rounded text-sm cursor-pointer" onClick={() => { handleShowFlashcards(flashcard.id) }}>Ver Pregunta</button>
-                          </>
-                          :
-                          <>
-                            <div className="font-semibold mb-2 dark:text-white text-wrap text-center">{flashcard?.question}</div>
-                            <button className="px-3 py-1  bg-blue-600 hover:bg-blue-700  text-white rounded text-sm cursor-pointer" onClick={() => { handleShowFlashcards(flashcard.id) }}>Ver Respuesta</button>
-                          </>
-                      }
-                    </div>))
-                  }
-
-                  {loadingFlashcards && Array.from({ length: 3 }).map((_, id) => (<SkeletonCardFlashcards key={id} />))}
-
-                  {!loadingFlashcards && flashcards?.length === 0 && (
-                    <div onClick={() => setModalGenFlashcardisOpen(!modalGenFlashcardisOpen)} className="bg-white dark:bg-gray-800 rounded-lg shadow p-2 py-6 flex flex-col justify-between items-center gap-2 min-w-[200px] sm:min-w-[300px]  max-w-sm min-h-40 cursor-pointer hover:bg-gray-200 duration-200 transition-all">
-                      <svg xmlns="http://www.w3.org/2000/svg" height="64px" viewBox="0 -960 960 960" width="64px" className="dark:fill-white fill-gray-800   ">
-                        <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" /></svg>
-                      <p className="text-center dark:text-white">¡Ups! Aún no hay flashcards. <br /> <span className="font-semibold">¡Créalas ahora!</span> </p>
-                    </div>)}
-                </div>
-              </div>
-              {/* Historial de Quizzes */}
-              <div>
-                <h3 className="font-bold text-xl dark:text-white mb-2">Historial de Quizzes</h3>
-
-
-                <div className="overflow-x-auto  border border-gray-300 shadow-sm dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg ">
-                  <table className="min-w-full divide-y-2 divide-gray-200 dark:divide-gray-700">
-                    <thead className="ltr:text-left rtl:text-right">
-                      <tr className="*:font-medium *:text-gray-900 dark:*:text-white">
-                        <th className="px-3 py-2 whitespace-nowrap">Quiz</th>
-                        <th className="px-3 py-2 whitespace-nowrap">Fecha</th>
-                        <th className="px-3 py-2 whitespace-nowrap">Puntuación</th>
-                        <th className="px-3 py-2 whitespace-nowrap">Revisar</th>
-                      </tr>
-                    </thead>
-
-                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                      <tr className="*:text-gray-900 *:first:font-medium dark:*:text-white">
-                        <td className="px-3 py-2 whitespace-nowrap">Introducción a la tecno</td>
-                        <td className="px-3 py-2 whitespace-nowrap">04/06/2025</td>
-                        <td className="px-3 py-2 whitespace-nowrap">
-                          <p className="flex gap-2">
-                            7 de 10
-                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#75FB4C"><path d="m424-296 282-282-56-56-226 226-114-114-56 56 170 170Zm56 216q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" /></svg>
-                          </p>
-                        </td>
-                        <td className="px-3 py-2 whitespace-nowrap">
-                          <button className="hover:bg-gray-300 dark:hover:bg-gray-600 p-1 rounded-full cursor-pointer">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="dark:fill-white fill-black"><path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z" /></svg>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr className="*:text-gray-900 *:first:font-medium dark:*:text-white">
-                        <td className="px-3 py-2 whitespace-nowrap">conceptos a la tecno</td>
-                        <td className="px-3 py-2 whitespace-nowrap">04/06/2025</td>
-                        <td className="px-3 py-2 whitespace-nowrap">
-                          <p className="flex gap-2">
-                            3 de 10
-                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#999999"><path d="M280-440h400v-80H280v80ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" /></svg>                          </p>
-                        </td>
-                        <td className="px-3 py-2 whitespace-nowrap">
-                          <button className="hover:bg-gray-300 dark:hover:bg-gray-600 p-1 rounded-full cursor-pointer">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="dark:fill-white fill-black"><path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z" /></svg>
-                          </button>
-                        </td>
-                      </tr>
-
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-
-            </section>
-          )}
           {tab === "integrantes" && (
             <section>
               <h3 className="font-bold mb-4">Integrantes del Grupo</h3>
