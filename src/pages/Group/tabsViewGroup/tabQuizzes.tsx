@@ -118,7 +118,7 @@ export default function Quizzes({ isOpen, group, modalQuizzesIsOpen, modalFlashc
                             <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
 
                                 <p>
-                                    Creado a las <span className="font-bold">{quiz?.createdAt?.toString().slice(11, 19)}</span>hrs. El <span className="font-bold">{quiz?.createdAt?.toString().slice(5, 10)}</span>
+                                    Creado a las <span className="font-bold">{quiz?.createdAt?.toString().slice(11, 19)}</span>hrs. El <span className="font-bold">{quiz?.createdAt?.toString().slice(0, 10)}</span>
                                 </p>
                             </div>
                             <button className="px-3 py-1 text-white rounded text-sm w-fit flex gap-1 items-center cursor-pointer  bg-blue-600 hover:bg-blue-700  ">
