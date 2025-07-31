@@ -1,4 +1,19 @@
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+
 export const Hero = () => {
+
+    const [isLogued, setIsLogued] = useState<boolean>(false)
+
+    useEffect(() => {
+        const token = localStorage.getItem("token")
+        if (token) {
+            setIsLogued(true)
+        } else {
+            setIsLogued(false)
+        }
+    }, [])
+    const navigate = useNavigate()
     return (
         <section className="bg-white lg:grid lg:h-screen lg:place-content-center dark:bg-gray-900 relative">
             <div
@@ -17,12 +32,27 @@ export const Hero = () => {
 
 
                     <div className="mt-4 flex gap-4 sm:mt-6">
-                        <a
-                            className="inline-block rounded border border-indigo-600 bg-indigo-600 px-5 py-3 font-medium text-white shadow-sm transition-colors hover:bg-indigo-700"
-                            href="#"
-                        >
-                            Comenzar
-                        </a>
+
+                        {isLogued ?
+                            <a
+                                className="inline-block rounded border border-indigo-600 bg-indigo-600 px-5 py-3 font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 cursor-pointer"
+                                onClick={() => navigate("/profile")}
+                            >
+                                Ir a mi perfil
+                            </a> :
+
+                            <a
+                                className="inline-block rounded border border-indigo-600 bg-indigo-600 px-5 py-3 font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 cursor-pointer"
+                                onClick={() => navigate("/auth/login")}
+
+                            >
+                                Comenzar
+                            </a>
+
+                        }
+
+
+
 
                         <a
                             className="inline-block rounded border border-gray-200 px-5 py-3 font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-white"
