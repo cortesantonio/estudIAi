@@ -11,11 +11,11 @@ export const Steps = () => {
                     <div
                         className="relative flex items-start gap-4 group-odd:flex-row-reverse group-odd:text-right group-even:order-last -mt-0.5"
                     >
-                        <span className="size-6 shrink-0 rounded-full bg-blue-600 flex justify-center items-center text-white ">1</span>
+                        <span className="size-3 shrink-0 rounded-full bg-blue-600 flex justify-center items-center text-white "></span>
                         <div className="-mt-2">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Crea un grupo de estudio y sube el material</h3>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">1. Crea un grupo de estudio y sube el material</h3>
                             <p className="mt-0.5 text-sm text-gray-700 dark:text-gray-200">
-                                Elige la materia, invita a tus compañeros y sube los documentos que entran en la prueba (PDF, DOCX o texto).
+                                Elige el nombre de tu grupo y color, invita a tus compañeros y sube el documento que entran en la prueba (PDF).
                             </p>
                         </div>
                     </div>
@@ -25,11 +25,11 @@ export const Steps = () => {
                     <div
                         className="relative flex items-start gap-4 group-odd:flex-row-reverse group-odd:text-right group-even:order-last"
                     >
-                        <span className="size-5 shrink-0 rounded-full bg-blue-600 flex justify-center items-center text-white font-bold">2</span>
+                        <span className="size-3 shrink-0 rounded-full bg-blue-600 flex justify-center items-center text-white font-bold"></span>
                         <div className="-mt-2">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Genera preguntas automáticamente</h3>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">2. Genera preguntas y flashcards automáticamente</h3>
                             <p className="mt-0.5 text-sm text-gray-700 dark:text-gray-200">
-                                El sistema analiza el contenido y crea preguntas tipo quiz listas para practicar.
+                                El sistema analiza el contenido y crea preguntas tipo quiz listas para practicar y flashcards para refrescar la memoria.
                             </p>
                         </div>
                     </div>
@@ -39,9 +39,9 @@ export const Steps = () => {
                     <div
                         className="relative flex items-start gap-4 group-odd:flex-row-reverse group-odd:text-right group-even:order-last"
                     >
-                        <span className="size-5 shrink-0 rounded-full bg-blue-600 flex justify-center items-center  text-white font-bold">3</span>
+                        <span className="size-3 shrink-0 rounded-full bg-blue-600 flex justify-center items-center  text-white font-bold"></span>
                         <div className="-mt-2">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Responde quizzes y compite en el ranking</h3>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">3. Responde quizzes y compite en el ranking</h3>
                             <p className="mt-0.5 text-sm text-gray-700 dark:text-gray-200">
                                 Practica con tus compañeros, revisa tus puntajes y mira tu posición en el ranking del grupo.
                             </p>
@@ -53,9 +53,9 @@ export const Steps = () => {
                     <div
                         className="relative flex items-start gap-4 group-odd:flex-row-reverse group-odd:text-right group-even:order-last"
                     >
-                        <span className="size-5 shrink-0 rounded-full bg-blue-600 flex justify-center items-center  text-white font-bold">4</span>
+                        <span className="size-3 shrink-0 rounded-full bg-blue-600 flex justify-center items-center  text-white font-bold"></span>
                         <div className="-mt-2">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Repite los quizzes y sigue tu progreso</h3>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">4. Repite los quizzes y sigue tu progreso</h3>
                             <p className="mt-0.5 text-sm text-gray-700 dark:text-gray-200">
                                 El grupo puede repetir las sesiones y ver estadísticas de avance para mejorar juntos.
                             </p>
