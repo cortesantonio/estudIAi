@@ -3,7 +3,7 @@ import type { LoginInterface } from "../../interfaces/Auth";
 import { login } from "../../services/authService";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-
+import { ClipLoader } from "react-spinners";
 interface responseDTO {
     user: {
         id: number,
@@ -18,6 +18,7 @@ interface responseDTO {
 
 export const Login = () => {
     const navigate = useNavigate();
+    const [loading, setLoading] = useState<Boolean>(false)
     const [error, setError] = useState<string>();
     const {
         register,
@@ -26,7 +27,7 @@ export const Login = () => {
     } = useForm<LoginInterface>();
 
     const onSubmit = async (data: LoginInterface) => {
-
+        setLoading(true)
         try {
             const response: responseDTO = await login(data);
             console.log(typeof (response));
@@ -35,9 +36,10 @@ export const Login = () => {
                 localStorage.setItem("user", JSON.stringify(response.user))
                 window.location.href = "/";
             }
-
+            setLoading(false)
         } catch (error: any) {
             setError(error.message || "Error desconocido");
+            setLoading(false)
             setTimeout(() => setError(""), 3000);
         }
     };
@@ -76,52 +78,6 @@ export const Login = () => {
                     <p className="mb-2.5 mt-2.5 font-normal dark:text-zinc-400 text-black">
                         Enter your email and password to sign in!
                     </p>
-                    <div className="mt-5">
-                        <form className="pb-2" >
-                            <input type="hidden" name="provider" value="google" /><button
-                                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-zinc-800 bg-none hover:bg-accent hover:text-accent-foreground h-10 px-4 w-full text-black dark:text-white py-6"
-                                type="submit"
-                            >
-                                <span className="mr-2"
-                                ><svg
-                                    stroke="currentColor"
-                                    fill="currentColor"
-                                    stroke-width="0"
-                                    version="1.1"
-                                    x="0px"
-                                    y="0px"
-                                    viewBox="0 0 48 48"
-                                    enable-background="new 0 0 48 48"
-                                    className="h-5 w-5"
-                                    height="1em"
-                                    width="1em"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                        <path
-                                            fill="#FFC107"
-                                            d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12
-c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24
-c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"
-                                        ></path>
-                                        <path
-                                            fill="#FF3D00"
-                                            d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657
-C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"
-                                        ></path>
-                                        <path
-                                            fill="#4CAF50"
-                                            d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36
-c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"
-                                        ></path>
-                                        <path
-                                            fill="#1976D2"
-                                            d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571
-c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"
-                                        ></path></svg></span >
-                                <span>Google</span>
-                            </button>
-                        </form>
-                    </div>
                     <div className="relative my-3">
                         <div className="relative flex items-center py-1">
                             <div className="grow border-t border-zinc-800"></div>
@@ -169,9 +125,14 @@ c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.
                                     dark:hover:bg-white/80 dark:hover:text-gray-900 dark:active:bg-white border-1 border-zinc-800 flex w-full max-w-full mt-6 items-center
                                     justify-center rounded-lg px-4 py-4 text-base font-medium cursor-pointer"
                                     type="submit"
+                                    disabled={loading ? true : false}
 
                                 >
-                                    Iniciar sesion
+                                    {!loading ? "Iniciar sesion" : <>
+                                        <ClipLoader size={18} />
+                                        <p className="ml-1">Cargando...</p>
+                                    </>}
+
                                 </button>
 
                             </div>
@@ -183,7 +144,7 @@ c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.
                             <a
                                 onClick={() => { navigate("/auth/register") }}
                                 className=" text-black text-sm dark:text-white"
-                            >Aun no tienes una cuenta?  <span className="font-medium hover:underline">Registrate</span></a>
+                            >Aun no tienes una cuenta?  <span className="font-medium hover:underline cursor-pointer">Registrate</span></a>
                         </p>
                     </div>
                 </div>
