@@ -22,7 +22,7 @@ export const login = async (datos: LoginInterface) => {
         return data;
     } catch (error: any) {
         // Puedes loguearlo o usarlo como hook global
-        throw new Error(error.message || 'Error al conectar con el servidor');
+        throw new Error(error.message && 'Error al conectar con el servidor');
     }
 };
 
@@ -47,6 +47,6 @@ export const registerUser = async (datos: LoginInterface) => {
         return data;
     } catch (error: any) {
         // Puedes loguearlo o usarlo como hook global
-        throw new Error(error.message || 'Error al conectar con el servidor');
+        throw new Error(error.message && 'Error al conectar con el servidor');
     }
 };
