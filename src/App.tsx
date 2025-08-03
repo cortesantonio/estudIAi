@@ -9,6 +9,7 @@ import { ViewGroup } from './pages/Group/ViewGroup'
 import { Quizzes } from './pages/Quizzes/Quizzes'
 import { JoinGame } from './pages/Game/JoinGame'
 import { Results } from './pages/Results/Results'
+import { Play } from './pages/Game/Play'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path='/quizzes' element={<Quizzes />} />
         <Route path='/join-game' element={<JoinGame />} />
         <Route path='/results' element={<Results />} />
+        <Route path='/play/:id' element={<Play />} />
       </Routes>
     </Router>
   )
