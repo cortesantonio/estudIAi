@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react"
+import { useParams, useNavigate } from "react-router-dom"
 import { AsideMenu } from "../../components/asideMenu"
+import { getQuizById } from "../../services/quizzesService"
 import type { Question, Quiz } from "../../interfaces/Quizzes"
 
-interface PlayProps {
-  quizId?: number
-  quizData?: Quiz
-}
-
-export const Play = ({ quizId, quizData }: PlayProps) => {
+export const Play = () => {
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [isAnswered, setIsAnswered] = useState(false)
@@ -18,67 +17,30 @@ export const Play = ({ quizId, quizData }: PlayProps) => {
   const [isLoading, setIsLoading] = useState(true)
   const [gameFinished, setGameFinished] = useState(false)
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  // Simular datos del quiz (en producción esto vendría de una API)
+  // Obtener datos del quiz desde la API
   useEffect(() => {
-    if (quizData) {
-      setQuiz(quizData)
-      setTotalQuestions(quizData.questions?.length || 0)
-      setIsLoading(false)
-    } else {
-      // Datos de ejemplo para demostración
-      const mockQuiz: Quiz = {
-        id: 1,
-        title: "Quiz de React",
-        description: "Preguntas sobre React y sus conceptos fundamentales",
-        duration: 10,
-        questions: [
-          {
-            id: 1,
-            quizId: 1,
-            text: "¿Qué es React?",
-            typelogy: "seleccion_unica",
-            options: [
-              "Un framework de JavaScript",
-              "Una librería de JavaScript",
-              "Un lenguaje de programación",
-              "Un sistema operativo"
-            ],
-            correctOption: 1
-          },
-          {
-            id: 2,
-            quizId: 1,
-            text: "¿Cuál es el hook más común en React?",
-            typelogy: "seleccion_unica",
-            options: [
-              "useEffect",
-              "useState",
-              "useContext",
-              "useReducer"
-            ],
-            correctOption: 1
-          },
-          {
-            id: 3,
-            quizId: 1,
-            text: "¿Qué método se usa para renderizar componentes en React?",
-            typelogy: "seleccion_unica",
-            options: [
-              "render()",
-              "ReactDOM.render()",
-              "createElement()",
-              "mount()"
-            ],
-            correctOption: 1
-          }
-        ]
+    const fetchQuiz = async () => {
+      if (!id) {
+        setError("ID del quiz no encontrado")
+        setIsLoading(false)
+        return
       }
-      setQuiz(mockQuiz)
-      setTotalQuestions(mockQuiz.questions?.length || 0)
-      setIsLoading(false)
+
+      try {
+        const quizData = await getQuizById(parseInt(id))
+        setQuiz(quizData)
+        setTotalQuestions(quizData.questions?.length || 0)
+        setIsLoading(false)
+      } catch (error: any) {
+        setError(error.message || "Error al cargar el quiz")
+        setIsLoading(false)
+      }
     }
-  }, [quizData])
+
+    fetchQuiz()
+  }, [id])
 
   // Timer para el quiz
   useEffect(() => {
@@ -158,6 +120,51 @@ export const Play = ({ quizId, quizData }: PlayProps) => {
     )
   }
 
+  if (error) {
+    return (
+      <div className="bg-gray-100 dark:bg-gray-700 min-h-screen">
+        <AsideMenu />
+        <main className="ease-soft-in-out lg:ml-68.5 relative min-h-screen rounded-xl transition-all duration-200 pt-8">
+          <div className="w-full px-6 mx-auto">
+            <div className="max-w-2xl mx-auto">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center">
+                <div className="w-24 h-24 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                
+                <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">
+                  Error al Cargar el Quiz
+                </h2>
+                
+                <p className="text-gray-600 dark:text-gray-400 mb-8">
+                  {error}
+                </p>
+
+                <div className="space-y-4">
+                  <button
+                    onClick={() => navigate('/quizzes')}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                  >
+                    Volver a Quizzes
+                  </button>
+                  
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                  >
+                    Intentar de Nuevo
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
   if (gameFinished) {
     return (
       <div className="bg-gray-100 dark:bg-gray-700 min-h-screen">
@@ -208,10 +215,10 @@ export const Play = ({ quizId, quizData }: PlayProps) => {
                   </button>
                   
                   <button
-                    onClick={() => window.history.back()}
+                    onClick={() => navigate('/quizzes')}
                     className="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
                   >
-                    Volver al Menú
+                    Volver a Quizzes
                   </button>
                 </div>
               </div>
@@ -373,7 +380,7 @@ export const Play = ({ quizId, quizData }: PlayProps) => {
                   {/* Botones de acción */}
                   <div className="flex justify-between">
                     <button
-                      onClick={() => window.history.back()}
+                      onClick={() => navigate('/quizzes')}
                       className="px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white font-medium transition-colors"
                     >
                       Salir del Quiz
