@@ -1,12 +1,17 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { AsideMenu } from "../../components/asideMenu"
-import { getQuizById } from "../../services/quizzesService"
-import type { Question, Quiz } from "../../interfaces/Quizzes"
+/* import { getQuizById } from "../../services/quizzesService"
+ */import type {  Quiz } from "../../interfaces/Quizzes"
+interface PlayProps {
+  quizId?: number
+  quizData?: Quiz
+}
 
 export const Play = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [isAnswered, setIsAnswered] = useState(false)
@@ -28,7 +33,7 @@ export const Play = () => {
         return
       }
 
-      try {
+     /*  try {
         const quizData = await getQuizById(parseInt(id))
         setQuiz(quizData)
         setTotalQuestions(quizData.questions?.length || 0)
@@ -36,7 +41,7 @@ export const Play = () => {
       } catch (error: any) {
         setError(error.message || "Error al cargar el quiz")
         setIsLoading(false)
-      }
+      } */
     }
 
     fetchQuiz()
@@ -46,7 +51,7 @@ export const Play = () => {
   useEffect(() => {
     if (quiz?.duration && !gameFinished) {
       setTimeLeft(quiz.duration * 60) // Convertir minutos a segundos
-      
+
       const timer = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev && prev <= 1) {
@@ -178,11 +183,11 @@ export const Play = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                
+
                 <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">
                   ¡Quiz Completado!
                 </h2>
-                
+
                 <div className="mb-8">
                   <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     {quiz?.title}
@@ -213,7 +218,7 @@ export const Play = () => {
                   >
                     Jugar de Nuevo
                   </button>
-                  
+
                   <button
                     onClick={() => navigate('/quizzes')}
                     className="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
@@ -247,7 +252,7 @@ export const Play = () => {
                   Pregunta {currentQuestionIndex + 1} de {totalQuestions}
                 </p>
               </div>
-              
+
               <div className="flex items-center gap-4">
                 {timeLeft !== null && (
                   <div className="flex items-center gap-2 bg-red-100 dark:bg-red-900 px-3 py-2 rounded-lg">
@@ -259,7 +264,7 @@ export const Play = () => {
                     </span>
                   </div>
                 )}
-                
+
                 <div className="bg-blue-100 dark:bg-blue-900 px-3 py-2 rounded-lg">
                   <span className="font-semibold text-blue-600 dark:text-blue-400">
                     {score}/{totalQuestions}
@@ -271,7 +276,7 @@ export const Play = () => {
             {/* Barra de progreso */}
             <div className="mt-4">
               <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                <div 
+                <div
                   className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%` }}
                 ></div>
@@ -298,45 +303,41 @@ export const Play = () => {
                         key={index}
                         onClick={() => handleAnswerSelect(index)}
                         disabled={isAnswered}
-                        className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-200 ${
-                          selectedAnswer === index
+                        className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-200 ${selectedAnswer === index
                             ? isAnswered
                               ? index === currentQuestion.correctOption
                                 ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
                                 : 'border-red-500 bg-red-50 dark:bg-red-900/20'
                               : 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                             : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-                        } ${
-                          isAnswered && index === currentQuestion.correctOption
+                          } ${isAnswered && index === currentQuestion.correctOption
                             ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
                             : ''
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                            selectedAnswer === index
+                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${selectedAnswer === index
                               ? isAnswered
                                 ? index === currentQuestion.correctOption
                                   ? 'border-green-500 bg-green-500'
                                   : 'border-red-500 bg-red-500'
                                 : 'border-blue-500 bg-blue-500'
                               : 'border-gray-300 dark:border-gray-500'
-                          }`}>
+                            }`}>
                             {selectedAnswer === index && (
                               <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                               </svg>
                             )}
                           </div>
-                          <span className={`font-medium ${
-                            selectedAnswer === index
+                          <span className={`font-medium ${selectedAnswer === index
                               ? isAnswered
                                 ? index === currentQuestion.correctOption
                                   ? 'text-green-700 dark:text-green-300'
                                   : 'text-red-700 dark:text-red-300'
                                 : 'text-blue-700 dark:text-blue-300'
                               : 'text-gray-700 dark:text-gray-300'
-                          }`}>
+                            }`}>
                             {option}
                           </span>
                         </div>
@@ -346,11 +347,10 @@ export const Play = () => {
 
                   {/* Feedback de respuesta */}
                   {isAnswered && (
-                    <div className={`mb-6 p-4 rounded-lg ${
-                      isCorrect 
-                        ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' 
+                    <div className={`mb-6 p-4 rounded-lg ${isCorrect
+                        ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
                         : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
-                    }`}>
+                      }`}>
                       <div className="flex items-center gap-3">
                         {isCorrect ? (
                           <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -361,11 +361,10 @@ export const Play = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                           </svg>
                         )}
-                        <span className={`font-semibold ${
-                          isCorrect 
-                            ? 'text-green-700 dark:text-green-300' 
+                        <span className={`font-semibold ${isCorrect
+                            ? 'text-green-700 dark:text-green-300'
                             : 'text-red-700 dark:text-red-300'
-                        }`}>
+                          }`}>
                           {isCorrect ? '¡Correcto!' : 'Incorrecto'}
                         </span>
                       </div>
@@ -385,7 +384,7 @@ export const Play = () => {
                     >
                       Salir del Quiz
                     </button>
-                    
+
                     <div className="flex gap-3">
                       {!isAnswered ? (
                         <button

@@ -91,6 +91,9 @@ export default function Quizzes({ isOpen, group, modalQuizzesIsOpen, modalFlashc
         }
 
     }
+
+
+
     return (
 
         <section className="flex flex-col gap-8">
@@ -122,7 +125,8 @@ export default function Quizzes({ isOpen, group, modalQuizzesIsOpen, modalFlashc
                                     Creado a las <span className="font-bold">{quiz?.createdAt?.toString().slice(11, 19)}</span>hrs. El <span className="font-bold">{quiz?.createdAt?.toString().slice(0, 10)}</span>
                                 </p>
                             </div>
-                            <button className="px-3 py-1 text-white rounded text-sm w-fit flex gap-1 items-center cursor-pointer  bg-blue-600 hover:bg-blue-700" onClick={() => { navigate(`/play/${quiz?.id}`) }}>
+                            <button className="px-3 py-1 text-white rounded text-sm w-fit flex gap-1 items-center cursor-pointer  bg-blue-600 hover:bg-blue-700"
+                                onClick={() => { navigate(`/play/${quiz?.id}`) }}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
