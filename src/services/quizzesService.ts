@@ -26,3 +26,23 @@ export const CreateQuizzes = async (datos: ParamsNewSession) => {
     }
 }
 
+export const getQuizById = async (id: number) => {
+    const urlApi = import.meta.env.VITE_API_URL;
+    try {
+        const response = await fetch(`${urlApi}/quizzes/get-game/${id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Error al obtener el quiz');
+        }
+
+        return await response.json();
+    } catch (error: any) {
+        throw new Error(error.message || 'Error al conectar con el servidor');
+    }
+}

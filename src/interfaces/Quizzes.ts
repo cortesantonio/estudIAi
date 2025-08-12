@@ -42,7 +42,7 @@ export interface Question {
     id: number;
     quizId: number;
     quiz?: Quiz;
-    text: string;
+    questionText: string;
     typelogy: string;
     options: string[];
     correctOption: number;
