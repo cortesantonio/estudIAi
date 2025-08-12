@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate  } from "react-router-dom"
 import { AsideMenu } from "../../components/asideMenu"
-/* import { getQuizById } from "../../services/quizzesService"
- */import type {  Quiz } from "../../interfaces/Quizzes"
+import { getQuizById } from "../../services/quizzesService"
+import type { Question, Quiz } from "../../interfaces/Quizzes"
 interface PlayProps {
   quizId?: number
   quizData?: Quiz
@@ -18,7 +18,7 @@ export const Play = () => {
   const [isCorrect, setIsCorrect] = useState(false)
   const [score, setScore] = useState(0)
   const [totalQuestions, setTotalQuestions] = useState(0)
-  const [quiz, setQuiz] = useState<Quiz | null>(null)
+  const [quiz, setQuiz] = useState<Question[] | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [gameFinished, setGameFinished] = useState(false)
   const [timeLeft, setTimeLeft] = useState<number | null>(null)
@@ -33,15 +33,16 @@ export const Play = () => {
         return
       }
 
-     /*  try {
+      try {
         const quizData = await getQuizById(parseInt(id))
         setQuiz(quizData)
-        setTotalQuestions(quizData.questions?.length || 0)
+        setTotalQuestions(quizData.length)
         setIsLoading(false)
+        console.log(quizData)
       } catch (error: any) {
         setError(error.message || "Error al cargar el quiz")
         setIsLoading(false)
-      } */
+      }
     }
 
     fetchQuiz()
@@ -49,8 +50,8 @@ export const Play = () => {
 
   // Timer para el quiz
   useEffect(() => {
-    if (quiz?.duration && !gameFinished) {
-      setTimeLeft(quiz.duration * 60) // Convertir minutos a segundos
+    if (quiz && !gameFinished) {
+      setTimeLeft(quiz.length * 60) // Convertir minutos a segundos
 
       const timer = setInterval(() => {
         setTimeLeft((prev) => {
@@ -75,7 +76,7 @@ export const Play = () => {
   const handleSubmitAnswer = () => {
     if (selectedAnswer === null || isAnswered) return
 
-    const currentQuestion = quiz?.questions?.[currentQuestionIndex]
+    const currentQuestion = quiz?.[currentQuestionIndex]
     if (!currentQuestion) return
 
     const correct = selectedAnswer === currentQuestion.correctOption
@@ -88,7 +89,7 @@ export const Play = () => {
   }
 
   const handleNextQuestion = () => {
-    if (currentQuestionIndex < (quiz?.questions?.length || 0) - 1) {
+    if (currentQuestionIndex < (quiz?.length || 0) - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1)
       setSelectedAnswer(null)
       setIsAnswered(false)
@@ -109,7 +110,7 @@ export const Play = () => {
   }
 
   const getCurrentQuestion = () => {
-    return quiz?.questions?.[currentQuestionIndex]
+    return quiz?.[currentQuestionIndex]
   }
 
   if (isLoading) {
@@ -138,11 +139,11 @@ export const Play = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                   </svg>
                 </div>
-                
+
                 <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">
                   Error al Cargar el Quiz
                 </h2>
-                
+
                 <p className="text-gray-600 dark:text-gray-400 mb-8">
                   {error}
                 </p>
@@ -154,7 +155,7 @@ export const Play = () => {
                   >
                     Volver a Quizzes
                   </button>
-                  
+
                   <button
                     onClick={() => window.location.reload()}
                     className="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
@@ -190,10 +191,10 @@ export const Play = () => {
 
                 <div className="mb-8">
                   <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    {quiz?.title}
-                  </h3>
+                    {/*                     {quiz?.title}
+ */}                  </h3>
                   <p className="text-gray-600 dark:text-gray-400">
-                    {quiz?.description}
+                    {quiz?.questionText}
                   </p>
                 </div>
 
@@ -246,7 +247,7 @@ export const Play = () => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-                  {quiz?.title}
+                  test
                 </h2>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
                   Pregunta {currentQuestionIndex + 1} de {totalQuestions}
@@ -292,24 +293,24 @@ export const Play = () => {
                   {/* Pregunta */}
                   <div className="mb-8">
                     <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-                      {currentQuestion.text}
+                      {currentQuestion.questionText}
                     </h3>
                   </div>
 
                   {/* Opciones */}
                   <div className="space-y-3 mb-8">
-                    {currentQuestion.options.map((option, index) => (
+                    {currentQuestion.answerOptions.map((option, index) => (
                       <button
                         key={index}
                         onClick={() => handleAnswerSelect(index)}
                         disabled={isAnswered}
                         className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-200 ${selectedAnswer === index
-                            ? isAnswered
-                              ? index === currentQuestion.correctOption
-                                ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                                : 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                              : 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                            : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                          ? isAnswered
+                            ? index === currentQuestion.correctOption
+                              ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                              : 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                            : 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                          : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                           } ${isAnswered && index === currentQuestion.correctOption
                             ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
                             : ''
@@ -317,12 +318,12 @@ export const Play = () => {
                       >
                         <div className="flex items-center gap-3">
                           <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${selectedAnswer === index
-                              ? isAnswered
-                                ? index === currentQuestion.correctOption
-                                  ? 'border-green-500 bg-green-500'
-                                  : 'border-red-500 bg-red-500'
-                                : 'border-blue-500 bg-blue-500'
-                              : 'border-gray-300 dark:border-gray-500'
+                            ? isAnswered
+                              ? index === currentQuestion.correctOption
+                                ? 'border-green-500 bg-green-500'
+                                : 'border-red-500 bg-red-500'
+                              : 'border-blue-500 bg-blue-500'
+                            : 'border-gray-300 dark:border-gray-500'
                             }`}>
                             {selectedAnswer === index && (
                               <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -331,12 +332,12 @@ export const Play = () => {
                             )}
                           </div>
                           <span className={`font-medium ${selectedAnswer === index
-                              ? isAnswered
-                                ? index === currentQuestion.correctOption
-                                  ? 'text-green-700 dark:text-green-300'
-                                  : 'text-red-700 dark:text-red-300'
-                                : 'text-blue-700 dark:text-blue-300'
-                              : 'text-gray-700 dark:text-gray-300'
+                            ? isAnswered
+                              ? index === currentQuestion.correctOption
+                                ? 'text-green-700 dark:text-green-300'
+                                : 'text-red-700 dark:text-red-300'
+                              : 'text-blue-700 dark:text-blue-300'
+                            : 'text-gray-700 dark:text-gray-300'
                             }`}>
                             {option}
                           </span>
@@ -348,8 +349,8 @@ export const Play = () => {
                   {/* Feedback de respuesta */}
                   {isAnswered && (
                     <div className={`mb-6 p-4 rounded-lg ${isCorrect
-                        ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
-                        : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+                      ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
+                      : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
                       }`}>
                       <div className="flex items-center gap-3">
                         {isCorrect ? (
@@ -362,8 +363,8 @@ export const Play = () => {
                           </svg>
                         )}
                         <span className={`font-semibold ${isCorrect
-                            ? 'text-green-700 dark:text-green-300'
-                            : 'text-red-700 dark:text-red-300'
+                          ? 'text-green-700 dark:text-green-300'
+                          : 'text-red-700 dark:text-red-300'
                           }`}>
                           {isCorrect ? '¡Correcto!' : 'Incorrecto'}
                         </span>
