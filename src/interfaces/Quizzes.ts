@@ -44,8 +44,8 @@ export interface Question {
     quiz?: Quiz;
     questionText: string;
     typelogy: string;
-    options: string[];
-    correctOption: number;
+    answerOptions: string[];
+    correctOptionIndex: number;
 }
 
 export interface Answer {
