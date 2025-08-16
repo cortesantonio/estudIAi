@@ -22,9 +22,7 @@ export const GenerateQuizModal = ({ isOpen, onClose, onSuccess, groupId }: Gener
         setValue,
     } = useForm<ParamsNewSession>();
 
-    useEffect(() => {
-        setValue("studyGroupId", groupId)
-    }, [groupId])
+
 
     const [quantity, setQuantity] = useState(5); // Estado para el contador
 
@@ -42,7 +40,10 @@ export const GenerateQuizModal = ({ isOpen, onClose, onSuccess, groupId }: Gener
     const onSubmit = async (data: ParamsNewSession) => {
         setLoading(true)
         try {
-            const response = await CreateQuizzes(data)
+            const response = await CreateQuizzes({
+                ...data,
+                studyGroupId: groupId
+            })
             console.log(response)
             onSuccess?.()
             setLoading(false)
