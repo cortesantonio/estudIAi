@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import type { ParamsNewSession } from "../../interfaces/Quizzes";
 import { PacmanLoader } from "react-spinners";
