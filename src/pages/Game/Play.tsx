@@ -15,10 +15,12 @@ export const Play = () => {
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [status, setStatus] = useState<"loading" | "error" | "playing" | "finished">("loading");
   const [error, setError] = useState<string>("");
+  const [isConfirmed, setIsConfirmed] = useState<boolean>(false);
 
   const totalQuestions = quiz.length;
   const currentQuestion = quiz[currentIndex];
-  const isAnswered = selected !== null;
+  const hasSelection = selected !== null;
+  const initialTime = totalQuestions * 60;
 
   // Cargar quiz
   useEffect(() => {
@@ -55,15 +57,16 @@ export const Play = () => {
     `${Math.floor(sec / 60)}:${(sec % 60).toString().padStart(2, "0")}`;
 
   const handleConfirm = () => {
-    console.log(selected, currentQuestion.correctOptionIndex)
-    if (selected === null) return;
+    if (selected === null || !currentQuestion) return;
     if (selected === currentQuestion.correctOptionIndex) setScore(s => s + 1);
+    setIsConfirmed(true);
   };
 
   const handleNext = () => {
     if (currentIndex + 1 < totalQuestions) {
       setCurrentIndex(i => i + 1);
       setSelected(null);
+      setIsConfirmed(false);
     } else {
       setStatus("finished");
     }
@@ -83,43 +86,158 @@ export const Play = () => {
     </div>
   );
 
-  const FinishedScreen = () => (
-    <div className="text-center p-8">
-      <h2 className="text-3xl font-bold mb-4">¡Quiz Completado!</h2>
-      <p className="mb-6">{score}/{totalQuestions} ({Math.round((score / totalQuestions) * 100)}%)</p>
-      <button onClick={() => window.location.reload()} className="btn-primary">Reintentar</button>
-      <button onClick={() => navigate("/quizzes")} className="btn-secondary">Volver</button>
-    </div>
-  );
+  const FinishedScreen = () => {
+    const percent = Math.round((score / Math.max(totalQuestions, 1)) * 100);
+    const errors = Math.max(totalQuestions - score, 0);
+    const timeUsed = Math.max(initialTime - timeLeft, 0);
+
+    const ringBgLight = `conic-gradient(rgb(37,99,235) ${percent}%, rgb(229,231,235) 0)`; // blue-600, gray-200
+    const ringBgDark = `conic-gradient(rgb(147,197,253) ${percent}%, rgb(75,85,99) 0)`; // blue-300, gray-600
+
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center p-6">
+        <div className="w-full max-w-3xl bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 md:p-10 text-center">
+          <div className="mb-6">
+            <span className="inline-block px-4 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-200">Completado</span>
+            <h2 className="text-3xl md:text-4xl font-extrabold mt-3 text-gray-900 dark:text-white">¡Excelente trabajo! 🎉</h2>
+            <p className="text-gray-600 dark:text-gray-300 mt-2">Has finalizado el quiz. Aquí tienes tu resultado:</p>
+          </div>
+
+          <div className="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-14 mb-8">
+            <div className="relative w-40 h-40 md:w-48 md:h-48">
+              <div
+                className="absolute inset-0 rounded-full"
+                style={{ background: ringBgLight }}
+              />
+              <div
+                className="absolute inset-0 rounded-full hidden dark:block"
+                style={{ background: ringBgDark }}
+              />
+              <div className="absolute inset-2 md:inset-3 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-inner">
+                <div>
+                  <div className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white">{percent}%</div>
+                  <div className="text-xs md:text-sm text-gray-500 dark:text-gray-300">Puntaje</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 md:gap-4 w-full md:w-auto">
+              <div className="rounded-2xl p-4 bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">
+                <div className="text-sm">Aciertos</div>
+                <div className="text-2xl font-bold">{score}</div>
+              </div>
+              <div className="rounded-2xl p-4 bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-200">
+                <div className="text-sm">Errores</div>
+                <div className="text-2xl font-bold">{errors}</div>
+              </div>
+              <div className="rounded-2xl p-4 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200">
+                <div className="text-sm">Tiempo</div>
+                <div className="text-2xl font-bold">{formatTime(timeUsed)}</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 rounded-xl font-semibold bg-blue-600 text-white shadow hover:bg-blue-700 active:scale-[0.99] transition"
+            >
+              Volver a intentar
+            </button>
+            <button
+              onClick={() => navigate("/quizzes")}
+              className="px-6 py-3 rounded-xl font-semibold bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100 shadow hover:bg-gray-300 dark:hover:bg-gray-600 active:scale-[0.99] transition"
+            >
+              Volver al listado
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
   const QuestionScreen = () => (
-    <div>
-      <header className="flex justify-between items-center mb-4">
-        <div>Pregunta {currentIndex + 1} / {totalQuestions}</div>
-        <div>{formatTime(timeLeft)}</div>
+    <div className="max-w-3xl mx-auto">
+      <header className="mb-6">
+        <div className="flex justify-between items-center mb-3">
+          <div className="text-sm text-gray-600 dark:text-gray-300">Pregunta {currentIndex + 1} / {totalQuestions}</div>
+          <div className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100 text-sm font-medium">
+            ⏱ {formatTime(timeLeft)}
+          </div>
+        </div>
+        <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 overflow-hidden">
+          <div
+            className="bg-blue-600 h-2 transition-all duration-500"
+            style={{ width: `${Math.min(((currentIndex) / Math.max(totalQuestions, 1)) * 100, 100)}%` }}
+          />
+        </div>
       </header>
 
-      <h3 className="text-lg font-semibold mb-4">{currentQuestion.questionText}</h3>
-      <div className="space-y-2 mb-6">
-        {currentQuestion.answerOptions.map((opt, i) => (
-          <button
-            key={i}
-            onClick={() => setSelected(i)}
-            className={`w-full p-3 border rounded ${selected === i ? "border-blue-500" : "border-gray-300"}`}
-          >
-            {opt}
-          </button>
-        ))}
-      </div>
+      <div className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6">
+        <h3 className="text-xl font-semibold mb-6 text-gray-900 dark:text-gray-100">{currentQuestion.questionText}</h3>
 
-      <div className="flex justify-end gap-2">
-        {isAnswered ? (
-          <button onClick={handleNext} className="btn-primary">
-            {currentIndex + 1 === totalQuestions ? "Finalizar" : "Siguiente"}
-          </button>
+        <div className="space-y-3 mb-6">
+          {currentQuestion.answerOptions.map((opt, i) => {
+            const isCorrectOption = i === currentQuestion.correctOptionIndex;
+            const isSelectedOption = i === selected;
+            const showCorrect = isConfirmed && isCorrectOption;
+            const showIncorrect = isConfirmed && isSelectedOption && !isCorrectOption;
+
+            const baseClasses = "w-full text-left p-4 border rounded-xl transition select-none disabled:opacity-70 disabled:cursor-not-allowed";
+            const stateClasses = isConfirmed
+              ? showCorrect
+                ? " border-green-500 bg-green-50 text-green-800"
+                : showIncorrect
+                  ? " border-red-500 bg-red-50 text-red-800"
+                  : " border-gray-300 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200"
+              : isSelectedOption
+                ? " border-blue-500 bg-blue-50 text-blue-800"
+                : " border-gray-300 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-500 text-gray-800 dark:text-gray-100";
+
+            return (
+              <button
+                key={i}
+                onClick={() => !isConfirmed && setSelected(i)}
+                disabled={isConfirmed}
+                className={baseClasses + stateClasses}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="flex-1">{opt}</span>
+                  {isConfirmed && (
+                    <span className={`text-sm font-medium ${showCorrect ? "text-green-700" : showIncorrect ? "text-red-700" : "text-gray-500"}`}>
+                      {showCorrect ? "Correcta" : showIncorrect ? "Tu elección" : ""}
+                    </span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {!isConfirmed ? (
+          <div className="flex justify-end">
+            <button
+              onClick={handleConfirm}
+              disabled={!hasSelection}
+              className={`px-6 py-3 rounded-xl font-medium shadow ${hasSelection ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-gray-300 text-gray-600 cursor-not-allowed"}`}
+            >
+              Confirmar
+            </button>
+          </div>
         ) : (
-          <button onClick={handleConfirm}  className=" bg-yellow-200">
-            Confirmar
-          </button>
+          <div className="mt-2 flex items-center justify-between">
+            <div>
+              {selected === currentQuestion.correctOptionIndex ? (
+                <span className="text-green-700 font-medium">¡Correcto! 🎉</span>
+              ) : (
+                <span className="text-red-700 font-medium">
+                  Incorrecto. Respuesta correcta: {currentQuestion.answerOptions[currentQuestion.correctOptionIndex]}
+                </span>
+              )}
+            </div>
+            <button onClick={handleNext} className="px-6 py-3 rounded-xl font-medium shadow bg-indigo-600 text-white hover:bg-indigo-700">
+              {currentIndex + 1 === totalQuestions ? "Finalizar" : "Siguiente"}
+            </button>
+          </div>
         )}
       </div>
     </div>
