@@ -10,6 +10,7 @@ import { Quizzes } from './pages/Quizzes/Quizzes'
 import { JoinGame } from './pages/Game/JoinGame'
 import { Results } from './pages/Results/Results'
 import { Play } from './pages/Game/Play'
+import { ProtectedRoute } from './routes/ProtectedRoute'
 
 function App() {
   return (
@@ -18,13 +19,13 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route path='/auth/login' element={<Login />} />
         <Route path="/auth/register" element={<Registro />} />
-        <Route path='/profile' element={< Profile />} />
-        <Route path='/groups' element={< Groups />} />
-        <Route path='/group/:id' element={<ViewGroup />} />
-        <Route path='/quizzes' element={<Quizzes />} />
-        <Route path='/join-game' element={<JoinGame />} />
-        <Route path='/results' element={<Results />} />
-        <Route path='/play/:id' element={<Play />} />
+        <Route path='/profile' element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path='/groups' element={<ProtectedRoute><Groups /></ProtectedRoute>} />
+        <Route path='/group/:id' element={<ProtectedRoute><ViewGroup /></ProtectedRoute>} />
+        <Route path='/quizzes' element={<ProtectedRoute><Quizzes /></ProtectedRoute>} />
+        <Route path='/join-game' element={<ProtectedRoute><JoinGame /></ProtectedRoute>} />
+        <Route path='/results' element={<ProtectedRoute><Results /></ProtectedRoute>} />
+        <Route path='/play/:id' element={<ProtectedRoute><Play /></ProtectedRoute>} />
       </Routes>
     </Router>
   )
