@@ -1,20 +1,58 @@
 import { useNavigate } from "react-router-dom"
 import { AsideMenu } from "../../components/asideMenu"
+import { EditProfileModal } from "../../components/EditProfileModal"
 import { useEffect, useState } from "react"
+import { useLogout } from "../../hooks/useLogout"
+import { GetGroupsOf } from "../../services/groupService"
+import { updateUserProfile } from "../../services/userService"
+import type { Group } from "../../interfaces/Group"
 
 export const Profile = () => {
     const navigate = useNavigate()
     const [user, setUser] = useState<any>();
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const { logout } = useLogout()
+    const [groups, setGroups] = useState<Group[]>([])
     useEffect(() => {
         const session = localStorage.getItem("user")
         if (session) {
             setUser(JSON.parse(session))
         }
-
     }, [])
 
+    const handleSaveProfile = async (updatedUser: any) => {
+        try {
+            // Llamar al servicio para actualizar el usuario en la base de datos
+            const response = await updateUserProfile(updatedUser.id, updatedUser);
+            
+            // Si la actualización es exitosa, actualizar el estado local
+            setUser(response);
+            localStorage.setItem("user", JSON.stringify(response));
+            
+            // Opcional: Mostrar mensaje de éxito
+            console.log('Perfil actualizado exitosamente');
+        } catch (error: any) {
+            // Manejar errores
+            console.error('Error al actualizar el perfil:', error.message);
+            // Opcional: Mostrar mensaje de error al usuario
+            alert('Error al actualizar el perfil: ' + error.message);
+        }
+    }
+    useEffect(() => {
+        async function GetGroups() {
+            const groups = await GetGroupsOf()
+            setGroups(groups)
+        }
+        GetGroups()
+    }, [user])
     return (
         <div className="bg-gray-100 dark:bg-gray-700">
+            <EditProfileModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                user={user}
+                onSave={handleSaveProfile}
+            />
             <AsideMenu />
             <main className="ease-soft-in-out lg:ml-68.5 relative min-h-screen   rounded-xl transition-all duration-200 ">
                 <nav
@@ -53,7 +91,7 @@ export const Profile = () => {
                             <div className="flex-none w-auto max-w-full px-3 my-auto">
                                 <div className="h-full">
                                     <h5 className="mb-1 font-semibold capitalize">{user?.name}</h5>
-                                    <p className="mb-0  leading-normal text-sm">Quimica y Farmacia</p>
+                                    <p className="mb-0  leading-normal text-sm">{user?.career || "Carrera sin especificar"}</p>
                                 </div>
                             </div>
                             <div className="w-full max-w-full px-3 mx-auto mt-4 sm:my-auto sm:mr-0 md:w-1/2 md:flex-none lg:w-4/12">
@@ -61,7 +99,9 @@ export const Profile = () => {
                                     <ul className="relative flex flex-wrap p-1 list-none bg-transparent rounded-xl gap-4" nav-pills role="tablist">
                                         <li className="z-30 flex-auto text-center  ">
                                             <a className="z-30  w-full px-0 py-1 mb-0 transition-colors border-0 rounded-lg ease-soft-in-out  text-slate-700 flex justify-center cursor-pointer dark:bg-gray-600 dark:lg:hover:bg-gray-700 lg:bg-gray-100/50 lg:hover:bg-white bg-gray-100 hover:bg-gray-200"
-                                                aria-selected="false">
+                                                aria-selected="false"
+                                                onClick={() => navigate("/groups")}
+                                            >
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="dark:fill-white" height="24px" viewBox="0 -960 960 960" width="24px"
                                                 >
                                                     <path d="M-16-224v-79q0-51 49-82t127-31h17q-17 25-25 52.86T144-305v81H-16Zm240 0v-81q0-35 18-65t53-52q35-22 82-33t102.96-11q57.04 0 103.54 11 46.5 11 81.5 33t53 52q18 30 18 65v81H224Zm592 0v-81q0-31.37-8-59.12-8-27.75-24-51.88h16q79.2 0 127.6 30.87Q976-354.26 976-303v79H816ZM354-331h253q-21-13-56-21t-70.5-8q-35.5 0-71 8T354-331ZM160.09-452Q123-452 96.5-478.39 70-504.77 70-541.82 70-580 96.39-606q26.38-26 63.43-26Q198-632 224-606.15q26 25.85 26 64.06 0 37.09-25.85 63.59T160.09-452Zm640 0q-37.09 0-63.59-26.39-26.5-26.38-26.5-63.43Q710-580 736.39-606q26.38-26 63.43-26Q838-632 864-606.15q26 25.85 26 64.06 0 37.09-25.85 63.59T800.09-452ZM480-495q-56.67 0-96.33-39.67Q344-574.33 344-631q0-57 39.67-96.5Q423.33-767 480-767q57 0 96.5 39.5T616-631q0 56.67-39.5 96.33Q537-495 480-495Zm.5-106q12.5 0 21-9t8.5-21.5q0-12.5-8.62-21-8.63-8.5-21.38-8.5-12 0-21 8.62-9 8.63-9 21.38 0 12 9 21t21.5 9Zm.5 270Zm-1-300Z" />
@@ -71,26 +111,30 @@ export const Profile = () => {
                                             </a>
                                         </li>
                                         <li className="z-30 flex-auto text-center  ">
-                                            <a className="z-30  w-full px-0 py-1 mb-0 transition-colors border-0 rounded-lg ease-soft-in-out  text-slate-700 flex justify-center cursor-pointer dark:bg-gray-600 dark:lg:hover:bg-gray-700 lg:bg-gray-100/50 lg:hover:bg-white bg-gray-100 hover:bg-gray-200"
-                                                aria-selected="false">
+                                            <button
+                                                className="z-30  w-full px-0 py-1 mb-0 transition-colors border-0 rounded-lg ease-soft-in-out  text-slate-700 flex justify-center cursor-pointer dark:bg-gray-600 dark:lg:hover:bg-gray-700 lg:bg-gray-100/50 lg:hover:bg-white bg-gray-100 hover:bg-gray-200"
+                                                onClick={() => setIsEditModalOpen(true)}
+                                            >
                                                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="dark:fill-white" >
-                                                    <path d="M272-74v-126h145v-83q-49-14-89-43.5T265-401q-99 5-168-66.5T28-640v-40q0-53 36.5-89.5T154-806h80v-80h492v80h80q53 0 89.5 36.5T932-680v40q0 101-69 172.5T695-401q-23 45-63 74.5T543-283v83h145v126H272Zm-38-454v-152h-80v40q0 38 22 68.5t58 43.5Zm246 128q50 0 85-35t35-85v-240H360v240q0 50 35 85t85 35Zm246-128q36-13 58-43.5t22-68.5v-40h-80v152Zm-246-52Z" />
+                                                    <path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l9 9q12 11 18 26.5t6 30.5q0 16-6 30.5T793-647L264-120H120Zm640-584-56-56 56 56Zm-141 141-28-29 57 57-29-28Z" />
                                                 </svg>
 
-
-                                                <span className="ml-1 dark:text-white">Resultados</span>
-                                            </a>
+                                                <span className="ml-1 dark:text-white">Editar Perfil</span>
+                                            </button>
                                         </li>
-                                        <li className="z-30 flex-auto text-center  ">
-                                            <a className="z-30  w-full px-0 py-1 mb-0 transition-colors border-0 rounded-lg ease-soft-in-out  text-slate-700 flex justify-center cursor-pointer   bg-red-700/20 hover:bg-red-700/40"
-                                                aria-selected="false"
+                                        <li className="z-30 flex-auto text-center">
+                                            <button
+                                                className="z-30 w-full px-0 py-1 mb-0 transition-all duration-200 border-0 rounded-lg ease-soft-in-out text-slate-700 flex justify-center cursor-pointer bg-gradient-to-tl from-red-500/10 to-pink-500/10 hover:from-red-500/20 hover:to-pink-500/20 dark:from-red-500/20 dark:to-pink-500/20 dark:hover:from-red-500/30 dark:hover:to-pink-500/30 group"
+                                                onClick={() => {
+                                                    logout()
+                                                }}
                                             >
-                                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="red">
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="transition-colors duration-200 group-hover:text-red-500 dark:text-red-400 dark:fill-red-400">
                                                     <path d="M212-86q-53 0-89.5-36.5T86-212v-536q0-53 36.5-89.5T212-874h276v126H212v536h276v126H212Zm415-146-88-89 96-96H352v-126h283l-96-96 88-89 247 248-247 248Z" />
                                                 </svg>
 
-                                                <span className="ml-1 text-red-600 font-semibold">Cerrar Sesión</span>
-                                            </a>
+                                                <span className="ml-1 font-semibold transition-colors duration-200 group-hover:text-red-500 dark:text-red-400">Cerrar Sesión</span>
+                                            </button>
                                         </li>
                                     </ul>
                                 </div>
@@ -109,7 +153,7 @@ export const Profile = () => {
                                             <div>
                                                 <p className="mb-0 font-sans font-semibold leading-normal text-sm dark:text-white">Respuestas Correctas</p>
                                                 <h5 className="mb-0 font-bold dark:text-white">
-                                                    53 <span className="leading-normal text-sm font-weight-bolder text-lime-500">+12%</span>
+                                                    -- <span className="leading-normal text-sm font-weight-bolder text-lime-500">--%</span>
                                                 </h5>
                                             </div>
                                         </div>
@@ -132,8 +176,8 @@ export const Profile = () => {
                                         <div className="flex-none w-2/3 max-w-full px-3">
                                             <div>
                                                 <p className="mb-0 font-sans font-semibold leading-normal text-sm dark:text-white">Quiz jugados</p>
-                                                <h5 className="mb-0 font-bold  dark:text-white">
-                                                    8 <span className="leading-normal text-sm font-weight-bolder text-lime-500 ">+50%</span>
+                                                <h5 className="mb-0 font-bold dark:text-white">
+                                                    -- <span className="leading-normal text-sm font-weight-bolder text-lime-500">--%</span>
                                                 </h5>
                                             </div>
                                         </div>
@@ -157,7 +201,7 @@ export const Profile = () => {
                                             <div>
                                                 <p className="mb-0 font-sans font-semibold leading-normal text-sm dark:text-white">Sesiones hechas</p>
                                                 <h5 className="mb-0 font-bold dark:text-white">
-                                                    +3,462 <span className="leading-normal text-red-600 text-sm font-weight-bolder">-2%</span>
+                                                    -- <span className="leading-normal text-sm font-weight-bolder text-lime-500">--%</span>
                                                 </h5>
                                             </div>
                                         </div>
@@ -181,7 +225,7 @@ export const Profile = () => {
                                             <div>
                                                 <p className="mb-0 font-sans font-semibold leading-normal text-sm dark:text-white">Grupos activos</p>
                                                 <h5 className="mb-0 font-bold dark:text-white">
-                                                    4 <span className="leading-normal text-sm font-weight-bolder text-lime-500">+100%</span>
+                                                    -- <span className="leading-normal text-sm font-weight-bolder text-lime-500">--%</span>
                                                 </h5>
                                             </div>
                                         </div>
@@ -273,7 +317,7 @@ export const Profile = () => {
                                                 <svg className="w-4 h-4  text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                                     <path fill-rule="evenodd" d="M12 2c-.791 0-1.55.314-2.11.874l-.893.893a.985.985 0 0 1-.696.288H7.04A2.984 2.984 0 0 0 4.055 7.04v1.262a.986.986 0 0 1-.288.696l-.893.893a2.984 2.984 0 0 0 0 4.22l.893.893a.985.985 0 0 1 .288.696v1.262a2.984 2.984 0 0 0 2.984 2.984h1.262c.261 0 .512.104.696.288l.893.893a2.984 2.984 0 0 0 4.22 0l.893-.893a.985.985 0 0 1 .696-.288h1.262a2.984 2.984 0 0 0 2.984-2.984V15.7c0-.261.104-.512.288-.696l.893-.893a2.984 2.984 0 0 0 0-4.22l-.893-.893a.985.985 0 0 1-.288-.696V7.04a2.984 2.984 0 0 0-2.984-2.984h-1.262a.985.985 0 0 1-.696-.288l-.893-.893A2.984 2.984 0 0 0 12 2Zm3.683 7.73a1 1 0 1 0-1.414-1.413l-4.253 4.253-1.277-1.277a1 1 0 0 0-1.415 1.414l1.985 1.984a1 1 0 0 0 1.414 0l4.96-4.96Z" clip-rule="evenodd" />
                                                 </svg>
-                                                <span className="mx-1 font-semibold ">30 done </span> this month
+                                                <span className="mx-1 font-semibold ">-- grupos nuevos </span> este mes
                                             </p>
                                         </div>
                                         <div className="flex-none w-5/12 max-w-full px-3 my-auto text-right lg:w-1/2 lg:flex-none">
@@ -310,7 +354,7 @@ export const Profile = () => {
                                                 </tr>
                                             </thead>
                                             <tbody >
-                                                <tr className=" mb-4">
+                                                {/* <tr className=" mb-4">
                                                     <td className="p-2 align-middle bg-transparent border-b whitespace-nowrap">
                                                         <div className="flex px-2 py-1">
                                                             <div className="size-10 aspect-square mr-2" >
@@ -368,7 +412,41 @@ export const Profile = () => {
                                                             </div>
                                                         </div>
                                                     </td>
-                                                </tr>
+                                                </tr> */}
+
+                                                {groups.map((group) => (
+                                                    <tr key={group.id} className=" mb-4">
+                                                        <td className="p-2 align-middle bg-transparent border-b whitespace-nowrap">
+                                                            <div className="flex  " >
+                                                                <div className="w-2 rounded-l-lg mr-2 border-1 border-gray-800" style={{ backgroundColor: `${group.hexColor}` }}></div>
+                                                                <div className="flex flex-col justify-center ">
+                                                                    <h6 className="mb-0 leading-normal text-sm ">{group.name}</h6>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-2 align-middle bg-transparent border-b whitespace-nowrap">
+                                                            <span className="font-semibold leading-tight text-xs">100%</span>
+                                                        </td>
+                                                        <td className="p-2 align-middle bg-transparent border-b whitespace-nowrap">
+                                                            <div className="w-3/4 mx-auto">
+                                                                <div>
+                                                                    <div>
+                                                                        <span className="font-semibold leading-tight text-xs">100%</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-2 align-middle bg-transparent border-b whitespace-nowrap">
+                                                            <div className="w-3/4 mx-auto">
+                                                                <div>
+                                                                    <div>
+                                                                        <span className="font-semibold leading-tight text-xs">100%</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
 
                                             </tbody>
                                         </table>
@@ -414,6 +492,14 @@ export const Profile = () => {
 
                 </div>
             </main>
+
+            {/* Edit Profile Modal */}
+            <EditProfileModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                user={user}
+                onSave={handleSaveProfile}
+            />
         </div>
     )
 }
