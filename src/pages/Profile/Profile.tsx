@@ -4,6 +4,7 @@ import { EditProfileModal } from "../../components/EditProfileModal"
 import { useEffect, useState } from "react"
 import { useLogout } from "../../hooks/useLogout"
 import { GetGroupsOf } from "../../services/groupService"
+import { updateUserProfile } from "../../services/userService"
 import type { Group } from "../../interfaces/Group"
 
 export const Profile = () => {
@@ -19,9 +20,23 @@ export const Profile = () => {
         }
     }, [])
 
-    const handleSaveProfile = (updatedUser: any) => {
-        setUser(updatedUser)
-        localStorage.setItem("user", JSON.stringify(updatedUser))
+    const handleSaveProfile = async (updatedUser: any) => {
+        try {
+            // Llamar al servicio para actualizar el usuario en la base de datos
+            const response = await updateUserProfile(updatedUser.id, updatedUser);
+            
+            // Si la actualización es exitosa, actualizar el estado local
+            setUser(response);
+            localStorage.setItem("user", JSON.stringify(response));
+            
+            // Opcional: Mostrar mensaje de éxito
+            console.log('Perfil actualizado exitosamente');
+        } catch (error: any) {
+            // Manejar errores
+            console.error('Error al actualizar el perfil:', error.message);
+            // Opcional: Mostrar mensaje de error al usuario
+            alert('Error al actualizar el perfil: ' + error.message);
+        }
     }
     useEffect(() => {
         async function GetGroups() {
