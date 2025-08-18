@@ -88,7 +88,7 @@ export const ViewGroup = () => {
       const filePath = `${group.id}/${timestamp}_${sanitizedName}`;
 
       // Subir archivo a Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('documentos')
         .upload(filePath, file, {
           cacheControl: '3600',
