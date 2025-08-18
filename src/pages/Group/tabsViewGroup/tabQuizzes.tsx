@@ -159,22 +159,54 @@ export default function Quizzes({ isOpen, group, modalQuizzesIsOpen, modalFlashc
                 <h3 className="font-bold mb-2 text-xl dark:text-white">Flashcards ({flashcards?.length || 0})</h3>
                 <div className="flex gap-4 overflow-auto pb-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-lg [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-lg [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-600  dark:[&::-webkit-scrollbar-thumb]:bg-gray-800 ">
 
-                    {flashcards && flashcards.map((flashcard) => (
-                        <div key={flashcard?.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-2 py-6 flex flex-col justify-between items-center gap-2 min-w-[200px] sm:min-w-[300px]  max-w-sm min-h-40">
-                            {
-                                showFlashcards.includes(flashcard.id) ?
-                                    <>
-                                        <div className="font-semibold mb-2 dark:text-white text-wrap text-center">{flashcard?.answer}</div>
-                                        <button className="px-3 py-1  bg-blue-600 hover:bg-blue-700  text-white rounded text-sm cursor-pointer" onClick={() => { handleShowFlashcards(flashcard.id) }}>Ver Pregunta</button>
-                                    </>
-                                    :
-                                    <>
-                                        <div className="font-semibold mb-2 dark:text-white text-wrap text-center">{flashcard?.question}</div>
-                                        <button className="px-3 py-1  bg-blue-600 hover:bg-blue-700  text-white rounded text-sm cursor-pointer" onClick={() => { handleShowFlashcards(flashcard.id) }}>Ver Respuesta</button>
-                                    </>
-                            }
-                        </div>))
-                    }
+                    {flashcards && flashcards.map((flashcard) => {
+                        const isFlipped = showFlashcards.includes(flashcard.id)
+                        return (
+                            <div key={flashcard?.id} className="group relative min-w-[220px] sm:min-w-[320px] max-w-sm">
+                                <div className="relative h-44 sm:h-52 [perspective:1000px]" onClick={() => { handleShowFlashcards(flashcard.id) }}>
+                                    <div className={`relative h-full w-full transition-transform duration-500 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}>
+                                        {/* Front (Pregunta) */}
+                                        <div className="absolute inset-0 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-4 flex flex-col gap-3 [backface-visibility:hidden]">
+                                            <div
+                                                className="flex text-center justify-center items-center h-full"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <span className="font-semibold dark:text-white whitespace-pre-wrap break-words">{flashcard?.question}</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-xs text-gray-500 dark:text-gray-400 text-center">Desplázate para leer todo •</span> <span  className="text-xs text-blue-600 dark:text-blue-400 text-center cursor-pointer">Toca para ver respuesta</span>
+
+                                            </div>
+                                        </div>
+                                        {/* Back (Respuesta) */}
+                                        <div className="absolute inset-0 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-4 flex flex-col gap-3 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                                            <div
+                                                className="flex-1 overflow-y-auto text-center pr-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-lg [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-lg [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-800  dark:[&::-webkit-scrollbar-thumb]:bg-gray-600"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <span className="font-semibold dark:text-white whitespace-pre-wrap break-words">{flashcard?.answer}</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-xs text-gray-500 dark:text-gray-400 text-center">Desplázate para leer todo •</span> <span className="text-xs text-blue-600 dark:text-blue-400 text-center cursor-pointer">Toca para ver pregunta</span>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button
+                                    className="absolute top-2 right-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-2 shadow transition-colors cursor-pointer"
+                                    title={isFlipped ? 'Ver pregunta' : 'Ver respuesta'}
+                                    onClick={(e) => { e.stopPropagation(); handleShowFlashcards(flashcard.id) }}
+                                    aria-label={isFlipped ? 'Ver pregunta' : 'Ver respuesta'}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                                        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                                        <path d="M22 2 12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        )
+                    })}
 
                     {loadingFlashcards && Array.from({ length: 3 }).map((_, id) => (<SkeletonCardFlashcards key={id} />))}
 
