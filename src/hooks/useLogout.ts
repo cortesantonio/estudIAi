@@ -7,6 +7,7 @@ export const useLogout = () => {
     // Limpiar datos de sesión
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    localStorage.removeItem('msjVersion')
     sessionStorage.clear()
     
     // Redirigir al login
