@@ -77,7 +77,6 @@ export const validateToken = async (token?: string): Promise<boolean> => {
         try {
             const data = await response.json();
             if (typeof data?.valid === 'boolean') {
-                console.log(data.valid)
                 return data.valid;
             }
         } catch (_) {
