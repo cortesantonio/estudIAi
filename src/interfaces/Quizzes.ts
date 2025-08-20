@@ -19,10 +19,10 @@ export interface Session {
 }
 
 export interface SessionAnswered {
-    id: number;
+    id?: number;
     sessionId: number;
     userId: number;
-    answeredAt: Date;
+    answeredAt?: Date;
     score: number;
 }
 
@@ -40,12 +40,17 @@ export interface Quiz {
 
 export interface Question {
     id: number;
-    quizId: number;
+    quizId?: number;
+    sessionId?: number;
     quiz?: Quiz;
     questionText: string;
-    typelogy: string;
+    typelogy?: string; // compatibilidad con backend previo
+    type?: string; // e.g., "verdadero y falso", "seleccion multiple"
     answerOptions: string[];
     correctOptionIndex: number;
+    explanation?: string;
+    generatedBy?: string;
+    documentId?: number;
 }
 
 export interface Answer {

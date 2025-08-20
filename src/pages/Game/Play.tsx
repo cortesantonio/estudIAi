@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AsideMenu } from "../../components/asideMenu";
-import { getQuizById } from "../../services/quizzesService";
-import type { Question } from "../../interfaces/Quizzes";
+import { getQuizById, getSessionAnswered, saveResult } from "../../services/quizzesService";
+import type { Question, SessionAnswered } from "../../interfaces/Quizzes";
 
 export const Play = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
   const [quiz, setQuiz] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
@@ -16,25 +16,51 @@ export const Play = () => {
   const [status, setStatus] = useState<"loading" | "error" | "playing" | "finished">("loading");
   const [error, setError] = useState<string>("");
   const [isConfirmed, setIsConfirmed] = useState<boolean>(false);
-
+  const [previousResult, setPreviousResult] = useState<SessionAnswered | null>(null);
+  const [isAlreadyAnswered, setIsAlreadyAnswered] = useState<boolean>(false);
   const totalQuestions = quiz.length;
   const currentQuestion = quiz[currentIndex];
   const hasSelection = selected !== null;
-  const initialTime = totalQuestions * 60;
+  const initialTime = totalQuestions * 30;
+
 
   // Cargar quiz
   useEffect(() => {
-    if (!id) return setError("ID no encontrado"), setStatus("error");
-    getQuizById(Number(id))
-      .then(data => {
-        setQuiz(data);
-        setTimeLeft(data.length * 60);
+    const loadQuizAndCheckStatus = async () => {
+      if (!id) return setError("ID no encontrado"), setStatus("error");
+
+      try {
+        // Primero obtener las preguntas para saber el total
+        const quizData = await getQuizById(Number(id));
+        if (quizData)
+          setQuiz(quizData);
+        setTimeLeft(quizData.length * 30);
+        // Luego verificar si ya fue respondido
+        try {
+          const result = await getSessionAnswered(Number(id), Number(user.id));
+          console.log(result)
+          if (result) {
+            setPreviousResult(result);
+            setIsAlreadyAnswered(true);
+            setStatus("finished");
+            return;
+          }
+        } catch {
+          setError("No hay resultado previo");
+          setStatus("error");
+          console.log("No hay resultado previo");
+        }
+
+        // Si no fue respondido, iniciar el juego
         setStatus("playing");
-      })
-      .catch(e => {
-        setError(e.message || "Error al cargar el quiz");
+      } catch (e: unknown) {
+        const errorMessage = e instanceof Error ? e.message : "Error al cargar el quiz";
+        setError(errorMessage);
         setStatus("error");
-      });
+      }
+    };
+
+    loadQuizAndCheckStatus();
   }, [id]);
 
   // Timer
@@ -87,12 +113,28 @@ export const Play = () => {
   );
 
   const FinishedScreen = () => {
-    const percent = Math.round((score / Math.max(totalQuestions, 1)) * 100);
-    const errors = Math.max(totalQuestions - score, 0);
-    const timeUsed = Math.max(initialTime - timeLeft, 0);
-
+    const currentScore = previousResult ? previousResult.score : score;
+    const percent = Math.round((currentScore / Math.max(totalQuestions, 1)) * 100);
+    const errors = Math.max(totalQuestions - currentScore, 0);
+    const timeUsed = isAlreadyAnswered ? 0 : Math.max(initialTime - timeLeft, 0);
     const ringBgLight = `conic-gradient(rgb(37,99,235) ${percent}%, rgb(229,231,235) 0)`; // blue-600, gray-200
     const ringBgDark = `conic-gradient(rgb(147,197,253) ${percent}%, rgb(75,85,99) 0)`; // blue-300, gray-600
+
+    // guardar resultado en la base de datos solo si no fue respondido antes y se ha jugado
+    useEffect(() => {
+      if (!isAlreadyAnswered && score > 0) {
+        const persistResult = async () => {
+          const resultToSave: SessionAnswered = {
+            sessionId: Number(id),
+            userId: Number(user.id),
+            answeredAt: new Date(),
+            score: score
+          };
+          await saveResult(resultToSave);
+        };
+        persistResult();
+      }
+    }, [score, errors, timeUsed, isAlreadyAnswered]);
 
     return (
       <div className="min-h-[60vh] flex items-center justify-center p-6">
@@ -124,7 +166,7 @@ export const Play = () => {
             <div className="grid grid-cols-3 gap-3 md:gap-4 w-full md:w-auto">
               <div className="rounded-2xl p-4 bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">
                 <div className="text-sm">Aciertos</div>
-                <div className="text-2xl font-bold">{score}</div>
+                <div className="text-2xl font-bold">{currentScore}</div>
               </div>
               <div className="rounded-2xl p-4 bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-200">
                 <div className="text-sm">Errores</div>
@@ -138,12 +180,14 @@ export const Play = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
-            <button
-              onClick={() => window.location.reload()}
-              className="px-6 py-3 rounded-xl font-semibold bg-blue-600 text-white shadow hover:bg-blue-700 active:scale-[0.99] transition"
-            >
-              Volver a intentar
-            </button>
+            {!isAlreadyAnswered && (
+              <button
+                onClick={() => window.location.reload()}
+                className="px-6 py-3 rounded-xl font-semibold bg-blue-600 text-white shadow hover:bg-blue-700 active:scale-[0.99] transition"
+              >
+                Volver a intentar
+              </button>
+            )}
             <button
               onClick={() => navigate("/quizzes")}
               className="px-6 py-3 rounded-xl font-semibold bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100 shadow hover:bg-gray-300 dark:hover:bg-gray-600 active:scale-[0.99] transition"
@@ -176,7 +220,9 @@ export const Play = () => {
         <h3 className="text-xl font-semibold mb-6 text-gray-900 dark:text-gray-100">{currentQuestion.questionText}</h3>
 
         <div className="space-y-3 mb-6">
-          {currentQuestion.answerOptions.map((opt, i) => {
+          {(currentQuestion.answerOptions && currentQuestion.answerOptions.length > 0
+            ? currentQuestion.answerOptions
+            : ["Verdadero", "Falso"]).map((opt, i) => {
             const isCorrectOption = i === currentQuestion.correctOptionIndex;
             const isSelectedOption = i === selected;
             const showCorrect = isConfirmed && isCorrectOption;
@@ -230,7 +276,9 @@ export const Play = () => {
                 <span className="text-green-700 font-medium">¡Correcto! 🎉</span>
               ) : (
                 <span className="text-red-700 font-medium">
-                  Incorrecto. Respuesta correcta: {currentQuestion.answerOptions[currentQuestion.correctOptionIndex]}
+                  Incorrecto. Respuesta correcta: {(currentQuestion.answerOptions && currentQuestion.answerOptions.length > 0
+                    ? currentQuestion.answerOptions
+                    : ["Verdadero", "Falso"]) [currentQuestion.correctOptionIndex]}
                 </span>
               )}
             </div>
@@ -246,7 +294,7 @@ export const Play = () => {
   return (
     <div className="bg-gray-100 dark:bg-gray-700 min-h-screen">
       <AsideMenu />
-      <main className="p-6">
+      <main className="p-6 lg:ml-68.5">
         {status === "loading" && <Loader />}
         {status === "error" && <ErrorScreen />}
         {status === "finished" && <FinishedScreen />}
