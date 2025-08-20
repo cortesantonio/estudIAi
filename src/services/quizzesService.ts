@@ -1,4 +1,4 @@
-import type { ParamsNewSession } from "../interfaces/Quizzes";
+import type { ParamsNewSession, SessionAnswered } from "../interfaces/Quizzes";
 
 
 export const CreateQuizzes = async (datos: ParamsNewSession) => {
@@ -46,3 +46,47 @@ export const getQuizById = async (id: number) => {
         throw new Error(error.message || 'Error al conectar con el servidor');
     }
 }
+
+export const saveResult = async (resultado: SessionAnswered) => {
+    const urlApi = import.meta.env.VITE_API_URL;
+    try {
+        const response = await fetch(`${urlApi}/quizzes/save-result`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(resultado),
+        });
+
+        if (!response.ok) {
+            throw new Error('Error al guardar el resultado');
+        }
+
+        return await response.json();
+    } catch (error: any) {
+        throw new Error(error.message || 'Error al conectar con el servidor');
+    }
+}
+
+export const getSessionAnswered = async (sessionId: number, userId: number) => {
+    const urlApi = import.meta.env.VITE_API_URL;
+    try {
+        const response = await fetch(`${urlApi}/quizzes/get-session-answered`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ sessionId, userId })
+        });
+
+        if (!response.ok) {
+            throw new Error('Error al obtener el resultado de la sesión');
+        }
+
+        return await response.json();
+    } catch (error: any) {
+        throw new Error(error.message || 'Error al conectar con el servidor');
+    }
+}   
