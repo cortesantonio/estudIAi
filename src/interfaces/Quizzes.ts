@@ -60,3 +60,16 @@ export interface Answer {
     questionId: number;
     answeredAt: Date;
 }
+
+export interface SessionWithAnswer {
+    id: number;
+    studyGroupId: number;
+    title: string;
+    description: string;
+    duration: number;
+    createdAt: Date;
+    isAnswered: boolean;
+    answeredAt?: Date;
+    score?: number;
+    totalQuestions?: number; // Puntaje máximo posible del quiz
+}
