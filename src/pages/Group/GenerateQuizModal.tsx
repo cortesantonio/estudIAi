@@ -7,11 +7,12 @@ import { CreateQuizzes } from "../../services/quizzesService";
 interface GenerateQuizModalProps {
     isOpen: boolean;
     groupId?: number;
+    documentName?: string;
     onClose: () => void;
     onSuccess?: () => void;
 }
 
-export const GenerateQuizModal = ({ isOpen, onClose, onSuccess, groupId }: GenerateQuizModalProps) => {
+export const GenerateQuizModal = ({ isOpen, onClose, onSuccess, groupId, documentName }: GenerateQuizModalProps) => {
     const [loading, setLoading] = useState(false)
 
     const {
@@ -44,9 +45,9 @@ export const GenerateQuizModal = ({ isOpen, onClose, onSuccess, groupId }: Gener
                 ...data,
                 studyGroupId: groupId
             })
-            console.log(response)
             onSuccess?.()
             setLoading(false)
+            handleClose()
         } catch (error) {
             console.log(error)
             setLoading(false)
@@ -85,7 +86,7 @@ export const GenerateQuizModal = ({ isOpen, onClose, onSuccess, groupId }: Gener
                             {/* Documento (solo label) */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                                    Documento: Nombre del documento activo
+                                    Documento: {documentName }
                                 </label>
                             </div>
 
@@ -108,7 +109,7 @@ export const GenerateQuizModal = ({ isOpen, onClose, onSuccess, groupId }: Gener
                                     Tipos de preguntas
                                 </label>
                                 <div className="flex flex-col gap-2 pl-1">
-                                    {["selección multiple", "verdadero y falso", "selección única", "respuesta corta"].map((type) => (
+                                    {["selección multiple", "verdadero y falso"].map((type) => (
                                         <label key={type} className="inline-flex items-center">
                                             <input
                                                 type="checkbox"

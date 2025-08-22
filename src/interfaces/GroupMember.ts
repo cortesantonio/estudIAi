@@ -6,7 +6,7 @@ export interface GroupMember {
     id: number,
     userId: number,
     studyGroupId: number,
-    joinedAt: Date,
+    joinedAt: string,
     studyGroup: Group,
     user: User
     role: "MEMBER" | "ADMIN"

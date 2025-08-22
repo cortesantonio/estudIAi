@@ -30,7 +30,6 @@ export const Login = () => {
         setLoading(true)
         try {
             const response: responseDTO = await login(data);
-            console.log(typeof (response));
             if (response) {
                 localStorage.setItem("token", response.token)
                 localStorage.setItem("user", JSON.stringify(response.user))
@@ -38,7 +37,17 @@ export const Login = () => {
             }
             setLoading(false)
         } catch (error: any) {
-            setError(error.message || "Error desconocido");
+            
+            // Manejar diferentes tipos de errores
+            let errorMessage = "Error desconocido";
+            
+            if (error.message) {
+                errorMessage = error.message;
+            } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                errorMessage = "Error de conexión. Verifica tu conexión a internet.";
+            }
+            
+            setError(errorMessage);
             setLoading(false)
             setTimeout(() => setError(""), 3000);
         }
@@ -52,12 +61,12 @@ export const Login = () => {
             <div
                 className="mx-auto flex w-full flex-col justify-center px-5 pt-0 md:max-w-[50%]  min-h-[100vh] lg:max-w-[50%] lg:px-6 pb-10"
             >
-                <a className="mt-10 w-fit text-black dark:text-white" href="/">
-                    <div className="flex w-fit items-center lg:pl-0 lg:pt-0 xl:pt-0">
+                <a className="mt-10 w-fit text-black dark:text-white" onClick={() => navigate(-1)}>
+                <div className="flex w-fit items-center lg:pl-0 lg:pt-0 xl:pt-0">
                         <svg
                             stroke="currentColor"
                             fill="currentColor"
-                            stroke-width="0"
+                            strokeWidth={0}
                             viewBox="0 0 320 512"
                             className="mr-3 h-[13px] w-[8px] text-black dark:text-white"
                             height="1em"

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { AsideMenu } from "../../components/asideMenu"
 import { useParams } from "react-router-dom"
-import { GetGroup } from "../../services/groupService"
+import { GetGroup, GetMembersOfGroups } from "../../services/groupService"
 import type { Group } from "../../interfaces/Group"
 import { Chat } from "./tabsViewGroup/tabChat"
 import { GenerateQuizModal } from "./GenerateQuizModal"
@@ -11,6 +11,13 @@ import type { Document } from "../../interfaces/Document"
 import { getDocument, registerDocument } from "../../services/documentService"
 import { ClipLoader } from "react-spinners"
 import Quizzes from "./tabsViewGroup/tabQuizzes"
+import Integrantes from "./tabsViewGroup/tabIntegrantes"
+import type { GroupMember } from "../../interfaces/GroupMember"
+import { getFlashcards } from "../../services/flashcardsService"
+import type { flashcards } from "../../interfaces/Flashcards"
+import type { SessionWithAnswer } from "../../interfaces/Quizzes"
+import { getSessions } from "../../services/sessionService"
+
 const TABS = [
   { key: "chat", label: "Chat grupal" },
   { key: "quizzes", label: "Quizzes" },
@@ -18,6 +25,7 @@ const TABS = [
   { key: "resultados", label: "Resultados" },
   { key: "progreso", label: "Progreso Individual" },
 ]
+
 
 export const ViewGroup = () => {
   const [loading, setLoading] = useState(true)
@@ -30,30 +38,74 @@ export const ViewGroup = () => {
   const [modalGenFlashcardisOpen, setModalGenFlashcardisOpen] = useState(false);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-
-
+  const [users, setUsers] = useState<GroupMember[]>([]);
+  const [flashcards, setFlashcards] = useState<flashcards[]>([]);
+  const [quizzes, setQuizzes] = useState<SessionWithAnswer[]>([]);
+  const [loadingFlashcards, setLoadingFlashcards] = useState(true)
+  const [loadingQuizzes, setLoadingQuizzes] = useState(true)
 
   // se obtiene la informacion del grupo para ser mostrada en pantalla.
   useEffect(() => {
-    async function fetchGroup(id: string) {
+    async function fetchAllData(id: string) {
       try {
-        const responseGroup = await GetGroup(id);
-        const respondeDocument = await getDocument(responseGroup.id);
-        setLoading(false)
+        // Cargar todo en paralelo usando Promise.allSettled
+        const results = await Promise.allSettled([
+          GetGroup(id),
+          getFlashcards(id),
+          getSessions(id)
+        ]);
 
-        setGroup(responseGroup)
-        setDocumento(respondeDocument)
+        // Procesar resultado del grupo
+        if (results[0].status === 'fulfilled') {
+          const responseGroup = results[0].value;
+          setGroup(responseGroup);
 
+          // Cargar documento y usuarios después de obtener el grupo
+          try {
+            const [respondeDocument, respondeUsers] = await Promise.all([
+              getDocument(responseGroup.id),
+              GetMembersOfGroups(responseGroup.id)
+            ]);
+            setDocumento(respondeDocument);
+            setUsers(respondeUsers);
+          } catch (error) {
+            console.error('Error cargando documento o usuarios:', error);
+          }
+        } else {
+          console.error('Error cargando grupo:', results[0].reason);
+        }
+
+        // Procesar resultado de flashcards
+        if (results[1].status === 'fulfilled') {
+          setFlashcards(results[1].value);
+        } else {
+          console.error('Error cargando flashcards:', results[1].reason);
+        }
+        setLoadingFlashcards(false);
+
+        // Procesar resultado de sesiones
+        if (results[2].status === 'fulfilled') {
+          const sessions = results[2].value;
+          sessions.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          setQuizzes(sessions);
+        } else {
+          console.error('Error cargando sesiones:', results[2].reason);
+        }
+        setLoadingQuizzes(false);
+
+        setLoading(false);
       } catch (error) {
-        setLoading(false)
-
-        console.error(error)
+        console.error('Error general en fetchAllData:', error);
+        setLoading(false);
+        setLoadingFlashcards(false);
+        setLoadingQuizzes(false);
       }
-
     }
-    fetchGroup(id || "")
-  }, [id])
 
+    if (id) {
+      fetchAllData(id);
+    }
+  }, [id])
 
   const handleUpload = async () => {
     if (!file) {
@@ -139,13 +191,17 @@ export const ViewGroup = () => {
     }
   };
 
-
-
-
+  const onSuccessModalQuizzes = async () => {
+    if (group?.id) {
+      const response = await getSessions(group?.id.toString() || "")
+      setQuizzes(response)
+    }
+  }
+  console.log(documento)
   return (
     <div className="bg-gray-100 dark:bg-gray-700 min-h-screen">
       <AsideMenu />
-      <GenerateQuizModal isOpen={modalGenQuizzesisOpen} onClose={() => setModalGenQuizzesisOpen(false)} onSuccess={() => { window.location.reload() }} groupId={group?.id} />
+      <GenerateQuizModal isOpen={modalGenQuizzesisOpen} onClose={() => setModalGenQuizzesisOpen(false)} onSuccess={() => { onSuccessModalQuizzes }} groupId={group?.id} documentName={documento?.title} />
       <GenerateFlashcards isOpen={modalGenFlashcardisOpen} onClose={() => setModalGenFlashcardisOpen(false)} onSuccess={() => { window.location.reload() }} groupId={group?.id || 0} />
 
       <main className="ease-soft-in-out lg:ml-68.5 relative min-h-screen rounded-xl transition-all duration-200 pt-8">
@@ -303,36 +359,16 @@ export const ViewGroup = () => {
           className="w-full px-6 mx-auto pb-12 ">
 
           <Chat isOpen={tab === "chat"} group={group as Group} />
-          <Quizzes isOpen={tab === "quizzes"} group={group as Group} modalFlashcardsIsOpen={() => setModalGenFlashcardisOpen(!modalGenFlashcardisOpen)} modalQuizzesIsOpen={() => setModalGenQuizzesisOpen(!modalGenQuizzesisOpen)} />
+          <Quizzes isOpen={tab === "quizzes"} group={group as Group}
+            modalFlashcardsIsOpen={() => setModalGenFlashcardisOpen(!modalGenFlashcardisOpen)}
+            modalQuizzesIsOpen={() => setModalGenQuizzesisOpen(!modalGenQuizzesisOpen)}
+            quizzes={quizzes}
+            flashcards={flashcards}
+            loadingFlashcards={loadingFlashcards}
+            loadingQuizzes={loadingQuizzes}
+          />
 
-          {tab === "integrantes" && (
-            <section>
-              <h3 className="font-bold mb-4">Integrantes del Grupo</h3>
-              <ul className="grid md:grid-cols-3 gap-4">
-                <li className="bg-white dark:bg-gray-800 rounded shadow p-4 flex items-center gap-3">
-                  <img src="/marie.jpg" className="w-10 h-10 rounded-full" alt="Avatar" />
-                  <div>
-                    <div className="font-semibold">Admin Ejemplo</div>
-                    <div className="text-xs text-gray-500">Administrador</div>
-                  </div>
-                </li>
-                <li className="bg-white dark:bg-gray-800 rounded shadow p-4 flex items-center gap-3">
-                  <img src="/ivana-square.jpg" className="w-10 h-10 rounded-full" alt="Avatar" />
-                  <div>
-                    <div className="font-semibold">Usuario1</div>
-                    <div className="text-xs text-gray-500">Miembro</div>
-                  </div>
-                </li>
-                <li className="bg-white dark:bg-gray-800 rounded shadow p-4 flex items-center gap-3">
-                  <img src="/team-1.jpg" className="w-10 h-10 rounded-full" alt="Avatar" />
-                  <div>
-                    <div className="font-semibold">Usuario2</div>
-                    <div className="text-xs text-gray-500">Miembro</div>
-                  </div>
-                </li>
-              </ul>
-            </section>
-          )}
+          <Integrantes isOpen={tab === "integrantes"} group={group as Group} users={users} />
           {tab === "resultados" && (
             <section className="flex flex-col gap-8">
               <div>

@@ -8,55 +8,24 @@ import type { SessionWithAnswer } from "../../../interfaces/Quizzes";
 
 interface QuizzesProps {
     isOpen: boolean;
-    group: Group;
+    group?: Group;
     modalQuizzesIsOpen: () => void;
     modalFlashcardsIsOpen: () => void;
+    quizzes: SessionWithAnswer[];
+    flashcards: flashcards[];
+    loadingFlashcards: boolean;
+    loadingQuizzes: boolean;
 
 }
 
-export default function Quizzes({ isOpen, group, modalQuizzesIsOpen, modalFlashcardsIsOpen }: QuizzesProps) {
+export default function Quizzes({ isOpen,
+    modalQuizzesIsOpen, modalFlashcardsIsOpen, quizzes, flashcards, loadingFlashcards, loadingQuizzes }: QuizzesProps) {
     if (!isOpen) { return null; }
-    if (!group) { return null; }
 
-    const [loadingFlashcards, setLoadingFlashcards] = useState(true)
-    const [loading, setLoading] = useState(true)
-    const [quizzes, setQuizzes] = useState<SessionWithAnswer[]>([]);
-    const [flashcards, setFlashcards] = useState<flashcards[]>();
+
     const [showFlashcards, setShowFlashcards] = useState<number[]>([])
     const navigate = useNavigate();
-    // se ejecuta al entrar a la vista para CARGAR TODAS LAS FLASHCARDS
-    useEffect(() => {
-        async function fetchFlashcards(id: any) {
-            try {
-                const response = await getFlashcards(id)
-                setFlashcards(response)
-                setLoadingFlashcards(false)
-            } catch (error) {
-                console.error(error)
-                setLoadingFlashcards(false)
-            }
-        }
-        fetchFlashcards(group.id)
 
-    }, [group.id])
-    // se ejecuta al entrar a la vista para CARGAR TODAS LAS SESSIONES DE QUIZZES. 
-    useEffect(() => {
-        async function fetSessions(id: any) {
-            try {
-                const response = await getSessions(id)
-                response.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-                setQuizzes(response)
-                setLoading(false)
-            } catch (error) {
-                console.error(error)
-                setLoading(false)
-            }
-        }
-        fetSessions(group.id)
-
-
-
-    }, [group.id])
 
 
     const SkeletonCard = () => {
@@ -101,6 +70,7 @@ export default function Quizzes({ isOpen, group, modalQuizzesIsOpen, modalFlashc
             <div>
                 <div className="mb-4 flex gap-4 items-center justify-between lg:justify-start ">
                     <h3 className="font-bold text-xl dark:text-white">Quizzes Disponibles</h3>
+                    
                     <button className="px-3 py-2 sm:w-50 bg-blue-600 hover:bg-blue-700  text-white rounded-lg font-semibold shadow transition-colors text-sm flex justify-center items-center gap-2 cursor-pointer"
                         title="Generar quizzes con ia" onClick={() => modalQuizzesIsOpen()}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#fff"><path d="M331-651 211-771l57-57 120 120-57 57Zm149-95v-170h80v170h-80Zm291 535L651-331l57-57 120 120-57 57Zm-63-440-57-57 120-120 57 57-120 120Zm38 171v-80h170v80H746ZM205-92 92-205q-12-12-12-28t12-28l363-364q35-35 85-35t85 35q35 35 35 85t-35 85L261-92q-12 12-28 12t-28-12Zm279-335-14.5-14-14.5-14-14-14-14-14 28 28 29 28ZM233-176l251-251-57-56-250 250 56 57Z" /></svg>
@@ -109,8 +79,8 @@ export default function Quizzes({ isOpen, group, modalQuizzesIsOpen, modalFlashc
                 </div>
 
                 <div className="flex gap-4 overflow-auto pb-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-lg [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-lg [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-600  dark:[&::-webkit-scrollbar-thumb]:bg-gray-800 ">
-                    {loading && Array.from({ length: 3 }).map((_, id) => <SkeletonCard key={id} />)}
-                    {!loading && quizzes && quizzes.map((quiz) => (
+                    {loadingQuizzes && Array.from({ length: 3 }).map((_, id) => <SkeletonCard key={id} />)}
+                    {!loadingQuizzes && quizzes && quizzes.map((quiz) => (
                         <div key={quiz?.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col justify-between gap-2 min-w-[250px] sm:min-w-[350px] max-w-1/3">
                             <h4 className="font-semibold dark:text-white ">{quiz?.title}</h4>
                             <p className="text-sm text-gray-600 dark:text-white">{quiz?.description}</p>
@@ -156,7 +126,7 @@ export default function Quizzes({ isOpen, group, modalQuizzesIsOpen, modalFlashc
                         </div>
                     ))}
 
-                    {!loading && quizzes?.length === 0 && (
+                    {!loadingQuizzes && quizzes?.length === 0 && (
                         <div onClick={() => modalQuizzesIsOpen()} className="bg-white dark:bg-gray-800 dark:hover:bg-gray-900 rounded-lg shadow p-2 py-6 flex flex-col justify-between items-center gap-2 min-w-[200px] sm:min-w-[300px]  max-w-sm min-h-40 cursor-pointer hover:bg-gray-200 duration-200 transition-all">
                             <svg xmlns="http://www.w3.org/2000/svg" height="64px" viewBox="0 -960 960 960" width="64px" className="dark:fill-white fill-gray-800   ">
                                 <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" /></svg>
@@ -266,7 +236,7 @@ export default function Quizzes({ isOpen, group, modalQuizzesIsOpen, modalFlashc
                                             </svg>
                                         </p>
                                     </td>
-                                   {/*  <td className="px-3 py-2 whitespace-nowrap">
+                                    {/*  <td className="px-3 py-2 whitespace-nowrap">
                                         <button
                                             className="hover:bg-gray-300 dark:hover:bg-gray-600 p-1 rounded-full cursor-pointer"
                                             onClick={() => navigate(`/results/${quiz.id}`)}
