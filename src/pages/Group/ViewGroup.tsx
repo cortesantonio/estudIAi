@@ -197,7 +197,6 @@ export const ViewGroup = () => {
       setQuizzes(response)
     }
   }
-  console.log(documento)
   return (
     <div className="bg-gray-100 dark:bg-gray-700 min-h-screen">
       <AsideMenu />
@@ -227,7 +226,7 @@ export const ViewGroup = () => {
                     <><span>ID #{group?.id}</span>
                       <span>Cód. Invitación: {group.inviteCode}</span>
                       <span className="flex items-center gap-1">
-                        <img className="w-6 h-6 rounded-full border-2 border-white dark:border-gray-700 shadow" src="/marie.jpg" alt="Avatar del administrador" />
+                        <img className="w-6 h-6 rounded-full border-2 border-white dark:border-gray-700 shadow" src={group.admin?.avatarUrl == null ? "/defaultAvatar.webp" : group.admin?.avatarUrl} alt="Avatar del administrador" />
                         Creado por
                         <span className="capitalize">{group.admin?.name}.</span></span>
 
@@ -346,6 +345,7 @@ export const ViewGroup = () => {
                 key={t.key}
                 className={`px-4 py-2 rounded-t-md font-semibold cursor-pointer transition-colors ${tab === t.key ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}
                 onClick={() => setTab(t.key)}
+                disabled={t.key === "chat"}
               >
                 {t.label}
               </button>

@@ -16,13 +16,20 @@ export const login = async (datos: LoginInterface) => {
         const data = await response.json();
 
         if (!response.ok) {
+            if (response.status == 401) {
+                throw new Error('Usuario no existe o la contraseña es incorrecta');
+            }
             throw new Error(data.message || 'Error en el login');
         }
 
         return data;
     } catch (error: any) {
-        // Puedes loguearlo o usarlo como hook global
-        throw new Error(error.message && 'Error al conectar con el servidor');
+        // Si ya tenemos un mensaje de error específico, lo usamos
+        if (error.message) {
+            throw error; // Re-lanzamos el error original con su mensaje
+        }
+        // Solo si no hay mensaje específico, lanzamos el error genérico
+        throw new Error('Error al conectar con el servidor');
     }
 };
 
@@ -46,8 +53,12 @@ export const registerUser = async (datos: LoginInterface) => {
 
         return data;
     } catch (error: any) {
-        // Puedes loguearlo o usarlo como hook global
-        throw new Error(error.message && 'Error al conectar con el servidor');
+        // Si ya tenemos un mensaje de error específico, lo usamos
+        if (error.message) {
+            throw error; // Re-lanzamos el error original con su mensaje
+        }
+        // Solo si no hay mensaje específico, lanzamos el error genérico
+        throw new Error('Error al conectar con el servidor');
     }
 };
 
