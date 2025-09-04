@@ -7,7 +7,7 @@ interface IntegrantesProps {
     isOpen: boolean;
 }
 
-export default function Integrantes({ group, users, isOpen }: IntegrantesProps) {
+export default function Integrantes({ users, isOpen }: IntegrantesProps) {
     if (!isOpen) return null;
 
     const getRoleIcon = (role: string) => {
@@ -101,7 +101,7 @@ export default function Integrantes({ group, users, isOpen }: IntegrantesProps) 
 
             {/* Lista de integrantes */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {users.map((user, index) => (
+                {users.map((user) => (
                     <div 
                         key={user.user.id} 
                         className="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-teal-200 dark:hover:border-teal-700 hover:scale-[1.02]"

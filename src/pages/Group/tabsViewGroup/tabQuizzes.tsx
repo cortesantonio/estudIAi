@@ -1,8 +1,7 @@
 import type { flashcards } from "../../../interfaces/Flashcards"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import type { Group } from "../../../interfaces/Group";
-import { getFlashcards } from "../../../services/flashcardsService"
-import { getSessions } from "../../../services/sessionService"
+
 import { useNavigate } from "react-router-dom";
 import type { SessionWithAnswer } from "../../../interfaces/Quizzes";
 

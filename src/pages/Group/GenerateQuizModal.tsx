@@ -41,7 +41,7 @@ export const GenerateQuizModal = ({ isOpen, onClose, onSuccess, groupId, documen
     const onSubmit = async (data: ParamsNewSession) => {
         setLoading(true)
         try {
-            const response = await CreateQuizzes({
+            await CreateQuizzes({
                 ...data,
                 studyGroupId: groupId
             })
