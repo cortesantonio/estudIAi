@@ -21,8 +21,8 @@ export const Hero = () => {
             >
                 <div className="max-w-prose text-left">
                     <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl dark:text-white">
-                        ¡Estudia en grupo, sube tus apuntes y
-                        <strong className="text-indigo-600"> prepárate </strong>
+                        ¿Estud<span className="text-indigo-500">IA</span>i en grupo? sube tus apuntes y
+                        <strong className=""> prepárate </strong>
                         para tus exámenes!
 
                     </h1>

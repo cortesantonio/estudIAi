@@ -2,7 +2,7 @@ export const Steps = () => {
     return (
         <section className="bg-white lg:grid lg:h-screen lg:place-content-center dark:bg-gray-900 px-4" id="steps">
             <h1 className="text-2xl font-semibold text-gray-800  lg:text-3xl dark:text-white  mx-auto">
-                ¿Cómo funciona EstudIAi?
+                ¿Cómo funciona Estud<span className="text-indigo-500">IA</span>i?
             </h1>
             <ol
                 className="mx-auto mt-20 max-w-screen-xl  sm:px-6 lg:px-8 relative space-y-8 before:absolute before:top-0 before:left-1/2 before:h-full before:w-0.5 before:-translate-x-1/2 before:rounded-full before:bg-gray-200 dark:before:bg-gray-700"
