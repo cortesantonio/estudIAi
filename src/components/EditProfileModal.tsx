@@ -1,24 +1,54 @@
 import { useState, useEffect } from "react"
 import type { User } from "../interfaces/User"
+import { updateUserProfile } from "../services/userService"
 
 interface EditProfileModalProps {
     isOpen: boolean
     onClose: () => void
     user: User | null
-    onSave: (updatedUser: User) => void
+    onUserUpdate?: (updatedUser: User) => void
 }
 
-export const EditProfileModal = ({ isOpen, onClose, user, onSave }: EditProfileModalProps) => {
-    const [formData, setFormData] = useState({
+export const EditProfileModal = ({ isOpen, onClose, user, onUserUpdate }: EditProfileModalProps) => {
+    const [formData, setFormData] = useState<Partial<User>>({
         name: "",
         email: "",
         career: ""
     })
-    const [errors, setErrors] = useState<{[key: string]: string}>({})
+    const [errors, setErrors] = useState<{ [key: string]: string }>({})
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [userData, setUserData] = useState<User | null>(null)
+
+    const handleSaveProfile = async (updatedUser: User) => {
+        try {
+            // Llamar al servicio para actualizar el usuario en la base de datos
+            const response = await updateUserProfile(updatedUser.id, updatedUser);
+            console.log(response)
+
+            // Si la actualización es exitosa, actualizar el estado local
+            setUserData(response);
+            localStorage.setItem("user", JSON.stringify(response));
+
+            // Notificar al componente padre sobre la actualización
+            if (onUserUpdate) {
+                onUserUpdate(response);
+            }
+
+            // Opcional: Mostrar mensaje de éxito
+            console.log('Perfil actualizado exitosamente');
+        } catch (error: any) {
+            // Manejar errores
+            console.error('Error al actualizar el perfil:', error.message);
+            // Opcional: Mostrar mensaje de error al usuario
+            alert('Error al actualizar el perfil: ' + error.message);
+            throw error; // Re-lanzar el error para que sea manejado en handleSubmit
+        }
+    }
+
 
     useEffect(() => {
         if (user) {
+            setUserData(user);
             setFormData({
                 name: user.name || "",
                 email: user.email || "",
@@ -29,44 +59,44 @@ export const EditProfileModal = ({ isOpen, onClose, user, onSave }: EditProfileM
     }, [user])
 
     const validateForm = () => {
-        const newErrors: {[key: string]: string} = {}
-        
-        if (!formData.name.trim()) {
+        const newErrors: { [key: string]: string } = {}
+
+        if (!formData.name?.trim()) {
             newErrors.name = "El nombre es requerido"
-        } else if (formData.name.trim().length < 2) {
+        } else if (formData.name?.trim().length < 2) {
             newErrors.name = "El nombre debe tener al menos 2 caracteres"
         }
-        
-        if (!formData.email.trim()) {
+
+        if (!formData.email?.trim()) {
             newErrors.email = "El email es requerido"
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email || "")) {
             newErrors.email = "El email no es válido"
         }
-        
-        if (!formData.career.trim()) {
+
+        if (!formData.career?.trim()) {
             newErrors.career = "La carrera es requerida"
         }
-        
+
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        
-        if (!validateForm() || !user) return
-        
+
+        if (!validateForm() || !userData) return
+
         setIsSubmitting(true)
-        
+
         try {
             const updatedUser: User = {
-                ...user,
-                name: formData.name.trim(),
-                email: formData.email.trim(),
-                career: formData.career.trim()
+                ...userData,
+                name: formData.name?.trim() || "",
+                email: formData.email?.trim() || "",
+                career: formData.career?.trim() || ""
             }
-            
-            await onSave(updatedUser)
+
+            await handleSaveProfile(updatedUser)
             onClose()
         } catch (error) {
             console.error("Error al guardar el perfil:", error)
@@ -82,7 +112,7 @@ export const EditProfileModal = ({ isOpen, onClose, user, onSave }: EditProfileM
             ...prev,
             [name]: value
         }))
-        
+
         // Limpiar error del campo cuando el usuario empiece a escribir
         if (errors[name]) {
             setErrors(prev => ({
@@ -140,11 +170,10 @@ export const EditProfileModal = ({ isOpen, onClose, user, onSave }: EditProfileM
                                 name="name"
                                 value={formData.name}
                                 onChange={handleChange}
-                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors ${
-                                    errors.name 
-                                        ? 'border-red-500 focus:ring-red-500' 
-                                        : 'border-gray-300 dark:border-gray-600'
-                                }`}
+                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors ${errors.name
+                                    ? 'border-red-500 focus:ring-red-500'
+                                    : 'border-gray-300 dark:border-gray-600'
+                                    }`}
                                 required
                                 disabled={isSubmitting}
                             />
@@ -164,11 +193,10 @@ export const EditProfileModal = ({ isOpen, onClose, user, onSave }: EditProfileM
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors ${
-                                    errors.email 
-                                        ? 'border-red-500 focus:ring-red-500' 
-                                        : 'border-gray-300 dark:border-gray-600'
-                                }`}
+                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors ${errors.email
+                                    ? 'border-red-500 focus:ring-red-500'
+                                    : 'border-gray-300 dark:border-gray-600'
+                                    }`}
                                 required
                                 disabled={isSubmitting}
                             />
@@ -186,13 +214,12 @@ export const EditProfileModal = ({ isOpen, onClose, user, onSave }: EditProfileM
                                 type="text"
                                 id="career"
                                 name="career"
-                                value={formData.career}
+                                value={formData.career || ""}
                                 onChange={handleChange}
-                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors ${
-                                    errors.career 
-                                        ? 'border-red-500 focus:ring-red-500' 
-                                        : 'border-gray-300 dark:border-gray-600'
-                                }`}
+                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors ${errors.career
+                                    ? 'border-red-500 focus:ring-red-500'
+                                    : 'border-gray-300 dark:border-gray-600'
+                                    }`}
                                 required
                                 disabled={isSubmitting}
                             />

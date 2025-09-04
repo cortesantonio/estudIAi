@@ -4,7 +4,6 @@ import { EditProfileModal } from "../../components/EditProfileModal"
 import { useEffect, useState } from "react"
 import { useLogout } from "../../hooks/useLogout"
 import { GetGroupsOf } from "../../services/groupService"
-import { updateUserProfile } from "../../services/userService"
 import type { Group } from "../../interfaces/Group"
 
 export const Profile = () => {
@@ -13,6 +12,10 @@ export const Profile = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const { logout } = useLogout()
     const [groups, setGroups] = useState<Group[]>([])
+
+    const handleUserUpdate = (updatedUser: any) => {
+        setUser(updatedUser);
+    }
     useEffect(() => {
         const session = localStorage.getItem("user")
         if (session) {
@@ -20,24 +23,7 @@ export const Profile = () => {
         }
     }, [])
 
-    const handleSaveProfile = async (updatedUser: any) => {
-        try {
-            // Llamar al servicio para actualizar el usuario en la base de datos
-            const response = await updateUserProfile(updatedUser.id, updatedUser);
-            
-            // Si la actualización es exitosa, actualizar el estado local
-            setUser(response);
-            localStorage.setItem("user", JSON.stringify(response));
-            
-            // Opcional: Mostrar mensaje de éxito
-            console.log('Perfil actualizado exitosamente');
-        } catch (error: any) {
-            // Manejar errores
-            console.error('Error al actualizar el perfil:', error.message);
-            // Opcional: Mostrar mensaje de error al usuario
-            alert('Error al actualizar el perfil: ' + error.message);
-        }
-    }
+
     useEffect(() => {
         async function GetGroups() {
             const groups = await GetGroupsOf()
@@ -51,7 +37,7 @@ export const Profile = () => {
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
                 user={user}
-                onSave={handleSaveProfile}
+                onUserUpdate={handleUserUpdate}
             />
             <AsideMenu />
             <main className="ease-soft-in-out lg:ml-68.5 relative min-h-screen   rounded-xl transition-all duration-200 ">
@@ -493,13 +479,7 @@ export const Profile = () => {
                 </div>
             </main>
 
-            {/* Edit Profile Modal */}
-            <EditProfileModal
-                isOpen={isEditModalOpen}
-                onClose={() => setIsEditModalOpen(false)}
-                user={user}
-                onSave={handleSaveProfile}
-            />
+
         </div>
     )
 }
